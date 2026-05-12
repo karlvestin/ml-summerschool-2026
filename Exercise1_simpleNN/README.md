@@ -1,0 +1,1 @@
+Build a simple neutral network with thee hidden sigmoid nodes. Use the EPICS reference documentation to find suitable record types for the task.  Pre-trained weights for signal classification are supplied as part of the exercise. The students build the data base and verify that feeding the network data gives the expected output.
