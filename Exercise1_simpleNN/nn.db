@@ -1,0 +1,237 @@
+# ============================================================
+# Minimal scalar-input neural network classifier
+#
+# Network:
+#   XNORM = clamp((INPUT-XMIN)/(XMAX-XMIN), 0, 1)
+#
+#   H1 = sigmoid(W1*XNORM+B1)
+#   H2 = sigmoid(W2*XNORM+B2)
+#   H3 = sigmoid(W3*XNORM+B3)
+#
+#   LOW_SUM  = L1*H1 + L2*H2 + L3*H3 + LB
+#   MID_SUM  = M1*H1 + M2*H2 + M3*H3 + MB
+#   HIGH_SUM = O1*H1 + O2*H2 + O3*H3 + OB
+#
+#   LOW_PROB, MID_PROB, HIGH_PROB = softmax(LOW_SUM, MID_SUM, HIGH_SUM)
+#
+#   CLASS = argmax(LOW_PROB, MID_PROB, HIGH_PROB)
+#   LABEL = LOW, MID, or HIGH
+#
+# Usage:
+#   dbLoadRecords("nn.db", "P=SYS:")
+#
+# Default weights are pre-trained to identify low, mid and high values
+# Weights and biases can be overridden by passing them as arguments to 
+# the dbLoadRecords call 
+# ============================================================
+
+# ----------------------------
+# Input scalar analogue value
+# ----------------------------
+
+record(ai, "$(P)NN:INPUT") {
+    field(DESC, "Scalar analogue input")
+    field(PINI, "1")
+    field(LOPR, "$(XMIN=0)")
+    field(HOPR, "$(XMAX=100)")
+    field(FLNK, "$(P)NN:XNORM")
+}
+
+
+# ----------------------------
+# Normalization
+# ----------------------------
+record(calc, "$(P)NN:XNORM") {
+    field(DESC, "Normalized NN input 0..1")
+    field(INPA, "$(P)NN:INPUT NPP")
+    field(CALC, "((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))<0?0:((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))>1?1:((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))")
+    field(FLNK, "$(P)NN:H1:SUM")
+}
+
+# ----------------------------
+# Hidden neuron 1
+# ----------------------------
+record(calc, "$(P)NN:H1:SUM") {
+    field(DESC, "Hidden 1 weighted sum")
+    field(INPA, "$(P)NN:XNORM NPP")
+    field(CALC, "$(W1=20)*A+$(B1=-6.6)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:H1")
+}
+
+record(calc, "$(P)NN:H1") {
+    field(DESC, "Hidden 1 sigmoid")
+    field(INPA, "$(P)NN:H1:SUM NPP")
+    field(CALC, "1/(1+EXP(-A))")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:H2:SUM")
+}
+
+
+# ----------------------------
+# Hidden neuron 2
+# ----------------------------
+
+record(calc, "$(P)NN:H2:SUM") {
+    field(DESC, "Hidden 2 weighted sum")
+    field(INPA, "$(P)NN:XNORM NPP")
+    field(CALC, "$(W2=20)*A+$(B2=-13.2)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:H2")
+}
+
+record(calc, "$(P)NN:H2") {
+    field(DESC, "Hidden 2 sigmoid")
+    field(INPA, "$(P)NN:H2:SUM NPP")
+    field(CALC, "1/(1+EXP(-A))")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:H3:SUM")
+}
+
+
+# ----------------------------
+# Hidden neuron 3
+# ----------------------------
+
+record(calc, "$(P)NN:H3:SUM") {
+    field(DESC, "Hidden 3 weighted sum")
+    field(INPA, "$(P)NN:XNORM NPP")
+    field(CALC, "$(W3=0)*A+$(B3=0.0)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:H3")
+}
+
+record(calc, "$(P)NN:H3") {
+    field(DESC, "Hidden 3 sigmoid")
+    field(INPA, "$(P)NN:H3:SUM NPP")
+    field(CALC, "1/(1+EXP(-A))")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:LOW:SUM")
+}
+
+# ----------------------------
+# Three-class output scores
+# ----------------------------
+record(calc, "$(P)NN:LOW:SUM") {
+    field(DESC, "LOW class score")
+    field(INPA, "$(P)NN:H1 NPP")
+    field(INPB, "$(P)NN:H2 NPP")
+    field(INPC, "$(P)NN:H3 NPP")
+    field(CALC, "$(L1=-6)*A+$(L2=0)*B+$(L3=0)*C+$(LB=3)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:MID:SUM")
+}
+
+record(calc, "$(P)NN:MID:SUM") {
+    field(DESC, "MID class score")
+    field(INPA, "$(P)NN:H1 NPP")
+    field(INPB, "$(P)NN:H2 NPP")
+    field(INPC, "$(P)NN:H3 NPP")
+    field(CALC, "$(M1=6)*A+$(M2=-6)*B+$(M3=0)*C+$(MB=-3)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:HIGH:SUM")
+}
+
+record(calc, "$(P)NN:HIGH:SUM") {
+    field(DESC, "HIGH class score")
+    field(INPA, "$(P)NN:H1 NPP")
+    field(INPB, "$(P)NN:H2 NPP")
+    field(INPC, "$(P)NN:H3 NPP")
+    field(CALC, "$(H1=0)*A+$(H2=6)*B+$(H3=0)*C+$(HB=-3)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:EXP:LOW")
+}
+
+# ----------------------------
+# Softmax probabilities
+# ----------------------------
+
+record(calc, "$(P)NN:EXP:LOW") {
+    field(DESC, "exp low score")
+    field(INPA, "$(P)NN:LOW:SUM NPP")
+    field(CALC, "EXP(A)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:EXP:MID")
+}
+
+record(calc, "$(P)NN:EXP:MID") {
+    field(DESC, "exp mid score")
+    field(INPA, "$(P)NN:MID:SUM NPP")
+    field(CALC, "EXP(A)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:EXP:HIGH")
+}
+
+record(calc, "$(P)NN:EXP:HIGH") {
+    field(DESC, "exp high score")
+    field(INPA, "$(P)NN:HIGH:SUM NPP")
+    field(CALC, "EXP(A)")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:EXP:SUM")
+}
+
+record(calc, "$(P)NN:EXP:SUM") {
+    field(DESC, "softmax denominator")
+    field(INPA, "$(P)NN:EXP:LOW NPP")
+    field(INPB, "$(P)NN:EXP:MID NPP")
+    field(INPC, "$(P)NN:EXP:HIGH NPP")
+    field(CALC, "A+B+C")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:LOW:PROB")
+}
+
+record(calc, "$(P)NN:LOW:PROB") {
+    field(DESC, "LOW probability")
+    field(INPA, "$(P)NN:EXP:LOW NPP")
+    field(INPB, "$(P)NN:EXP:SUM NPP")
+    field(CALC, "A/B")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:MID:PROB")
+}
+
+record(calc, "$(P)NN:MID:PROB") {
+    field(DESC, "MID probability")
+    field(INPA, "$(P)NN:EXP:MID NPP")
+    field(INPB, "$(P)NN:EXP:SUM NPP")
+    field(CALC, "A/B")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:HIGH:PROB")
+}
+
+record(calc, "$(P)NN:HIGH:PROB") {
+    field(DESC, "HIGH probability")
+    field(INPA, "$(P)NN:EXP:HIGH NPP")
+    field(INPB, "$(P)NN:EXP:SUM NPP")
+    field(CALC, "A/B")
+    field(PREC, "5")
+    field(FLNK, "$(P)NN:CLASS")
+}
+
+
+# ----------------------------
+# Pick class with highest probability
+# 0 = LOW, 1 = MID, 2 = HIGH
+# ----------------------------
+
+record(calc, "$(P)NN:CLASS") {
+    field(DESC, "NN 3-class result")
+    field(INPA, "$(P)NN:LOW:PROB NPP")
+    field(INPB, "$(P)NN:MID:PROB NPP")
+    field(INPC, "$(P)NN:HIGH:PROB NPP")
+    field(CALC, "A>=B&&A>=C?0:B>=A&&B>=C?1:2")
+    field(PREC, "0")
+    field(FLNK, "$(P)NN:LABEL")
+}
+
+record(mbbi, "$(P)NN:LABEL") {
+    field(DESC, "NN class label")
+    field(INP,  "$(P)NN:CLASS NPP")
+
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+
+    field(ZRST, "LOW")
+    field(ONST, "MID")
+    field(TWST, "HIGH")
+}
