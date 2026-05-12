@@ -1,0 +1,1 @@
+But even cooler is to be able to run natively compiled efficient C code for real time operation. In this step the students will install and compile mlpack (https://github.com/mlpack/mlpack) using training data from a suitable example (https://github.com/mlpack/examples/). The resulting trained network is then called directly from the EPICS IOC using an aSub record.  
