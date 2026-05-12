@@ -1,0 +1,1 @@
+Expand the network to be recurrent. Again pre-trained weights are supplied, but this time the network should be able to do simple trend detection.
