@@ -1,0 +1,301 @@
+# ============================================================
+# Minimal scalar-input recurrent neural network trend classifier
+#
+# Network:
+#   XNORM = clamp((INPUT-XMIN)/(XMAX-XMIN), 0, 1)
+#   DELTA = XNORM - PREV_XNORM
+#
+#   H1 = sigmoid(K*(-DELTA - EPS)      + R1*H1_PREV)
+#   H2 = sigmoid(K*( EPS - ABS(DELTA)) + R2*H2_PREV)
+#   H3 = sigmoid(K*( DELTA - EPS)      + R3*H3_PREV)
+#
+# Since H1, H2 and H3 are calc records, their previous VAL is used
+# directly as H1_PREV, H2_PREV and H3_PREV.
+#
+#   FALLING_SUM = L1*H1 + L2*H2 + L3*H3 + LB
+#   STABLE_SUM  = M1*H1 + M2*H2 + M3*H3 + MB
+#   RISING_SUM  = H1O*H1 + H2O*H2 + H3O*H3 + HB
+#
+#   FALLING_PROB, STABLE_PROB, RISING_PROB =
+#       softmax(FALLING_SUM, STABLE_SUM, RISING_SUM)
+#
+#   CLASS = argmax(FALLING_PROB, STABLE_PROB, RISING_PROB)
+#   LABEL = FALLING, STABLE, or RISING
+#
+# Usage:
+#   dbLoadRecords("rnn.db", "P=SYS:")
+#
+# Default weights detect falling, stable and rising trends.
+# ============================================================
+
+
+# ----------------------------
+# Input scalar analogue value
+# ----------------------------
+
+record(ai, "$(P)RNN:INPUT") {
+    field(DESC, "Scalar analogue input")
+    #field(PINI, "1")
+    field(LOPR, "$(XMIN=0)")
+    field(HOPR, "$(XMAX=100)")
+    field(FLNK, "$(P)RNN:XNORM")
+}
+
+
+# ----------------------------
+# Normalization
+# ----------------------------
+
+record(calc, "$(P)RNN:XNORM") {
+    field(DESC, "Normalized NN input 0..1")
+    field(INPA, "$(P)RNN:INPUT NPP")
+    field(CALC, "((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))<0?0:((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))>1?1:((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:DELTA")
+}
+
+
+# ----------------------------
+# Input memory and trend delta
+# ----------------------------
+
+record(ao, "$(P)RNN:PREV:XNORM") {
+    field(DESC, "Previous normalized input")
+    field(PREC, "5")
+    field(LOPR, "0")
+    field(HOPR, "1")
+}
+
+record(calc, "$(P)RNN:DELTA") {
+    field(DESC, "Input trend delta")
+    field(INPA, "$(P)RNN:XNORM NPP")
+    field(INPB, "$(P)RNN:PREV:XNORM NPP")
+    field(INPC, "$(P)RNN:PREV:XNORM.UDF NPP")
+    field(CALC, "C?0:A-B")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H1:SUM")
+}
+
+
+# ----------------------------
+# Hidden neuron 1: FALLING detector
+#
+# Uses previous H1 value directly through INPB.
+# ----------------------------
+
+record(calc, "$(P)RNN:H1:SUM") {
+    field(DESC, "Hidden 1 falling sum")
+    field(INPA, "$(P)RNN:DELTA NPP")
+    field(INPB, "$(P)RNN:H1 NPP")
+    field(CALC, "$(K=100)*(-A-$(EPS=0.02))+$(R1=1.5)*B")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H1")
+}
+
+record(calc, "$(P)RNN:H1") {
+    field(DESC, "Hidden 1 falling activation")
+    field(INPA, "$(P)RNN:H1:SUM NPP")
+    field(CALC, "1/(1+EXP(-A))")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H2:SUM")
+}
+
+
+# ----------------------------
+# Hidden neuron 2: STABLE detector
+#
+# Uses previous H2 value directly through INPB.
+# ----------------------------
+
+record(calc, "$(P)RNN:H2:SUM") {
+    field(DESC, "Hidden 2 stable sum")
+    field(INPA, "$(P)RNN:DELTA NPP")
+    field(INPB, "$(P)RNN:H2 NPP")
+    field(CALC, "$(K=100)*($(EPS=0.02)-ABS(A))+$(R2=1.5)*B")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H2")
+}
+
+record(calc, "$(P)RNN:H2") {
+    field(DESC, "Hidden 2 stable activation")
+    field(INPA, "$(P)RNN:H2:SUM NPP")
+    field(CALC, "1/(1+EXP(-A))")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H3:SUM")
+}
+
+
+# ----------------------------
+# Hidden neuron 3: RISING detector
+#
+# Uses previous H3 value directly through INPB.
+# ----------------------------
+
+record(calc, "$(P)RNN:H3:SUM") {
+    field(DESC, "Hidden 3 rising sum")
+    field(INPA, "$(P)RNN:DELTA NPP")
+    field(INPB, "$(P)RNN:H3 NPP")
+    field(CALC, "$(K=100)*(A-$(EPS=0.02))+$(R3=1.5)*B")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H3")
+}
+
+record(calc, "$(P)RNN:H3") {
+    field(DESC, "Hidden 3 rising activation")
+    field(INPA, "$(P)RNN:H3:SUM NPP")
+    field(CALC, "1/(1+EXP(-A))")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:LOW:SUM")
+}
+
+
+# ----------------------------
+# Three-class output scores
+#
+# To minimize changes from the first exercise:
+#   LOW  records now mean FALLING
+#   MID  records now mean STABLE
+#   HIGH records now mean RISING
+# ----------------------------
+
+record(calc, "$(P)RNN:LOW:SUM") {
+    field(DESC, "FALLING class score")
+    field(INPA, "$(P)RNN:H1 NPP")
+    field(INPB, "$(P)RNN:H2 NPP")
+    field(INPC, "$(P)RNN:H3 NPP")
+    field(CALC, "$(L1=6)*A+$(L2=-3)*B+$(L3=-6)*C+$(LB=0)")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:MID:SUM")
+}
+
+record(calc, "$(P)RNN:MID:SUM") {
+    field(DESC, "STABLE class score")
+    field(INPA, "$(P)RNN:H1 NPP")
+    field(INPB, "$(P)RNN:H2 NPP")
+    field(INPC, "$(P)RNN:H3 NPP")
+    field(CALC, "$(M1=-4)*A+$(M2=6)*B+$(M3=-4)*C+$(MB=0)")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:HIGH:SUM")
+}
+
+record(calc, "$(P)RNN:HIGH:SUM") {
+    field(DESC, "RISING class score")
+    field(INPA, "$(P)RNN:H1 NPP")
+    field(INPB, "$(P)RNN:H2 NPP")
+    field(INPC, "$(P)RNN:H3 NPP")
+    field(CALC, "$(H1O=-6)*A+$(H2O=-3)*B+$(H3O=6)*C+$(HB=0)")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:EXP:LOW")
+}
+
+
+# ----------------------------
+# Softmax probabilities
+# ----------------------------
+
+record(calc, "$(P)RNN:EXP:LOW") {
+    field(DESC, "exp falling score")
+    field(INPA, "$(P)RNN:LOW:SUM NPP")
+    field(CALC, "EXP(A)")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:EXP:MID")
+}
+
+record(calc, "$(P)RNN:EXP:MID") {
+    field(DESC, "exp stable score")
+    field(INPA, "$(P)RNN:MID:SUM NPP")
+    field(CALC, "EXP(A)")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:EXP:HIGH")
+}
+
+record(calc, "$(P)RNN:EXP:HIGH") {
+    field(DESC, "exp rising score")
+    field(INPA, "$(P)RNN:HIGH:SUM NPP")
+    field(CALC, "EXP(A)")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:EXP:SUM")
+}
+
+record(calc, "$(P)RNN:EXP:SUM") {
+    field(DESC, "softmax denominator")
+    field(INPA, "$(P)RNN:EXP:LOW NPP")
+    field(INPB, "$(P)RNN:EXP:MID NPP")
+    field(INPC, "$(P)RNN:EXP:HIGH NPP")
+    field(CALC, "A+B+C")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:LOW:PROB")
+}
+
+record(calc, "$(P)RNN:LOW:PROB") {
+    field(DESC, "FALLING probability")
+    field(INPA, "$(P)RNN:EXP:LOW NPP")
+    field(INPB, "$(P)RNN:EXP:SUM NPP")
+    field(CALC, "A/B")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:MID:PROB")
+}
+
+record(calc, "$(P)RNN:MID:PROB") {
+    field(DESC, "STABLE probability")
+    field(INPA, "$(P)RNN:EXP:MID NPP")
+    field(INPB, "$(P)RNN:EXP:SUM NPP")
+    field(CALC, "A/B")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:HIGH:PROB")
+}
+
+record(calc, "$(P)RNN:HIGH:PROB") {
+    field(DESC, "RISING probability")
+    field(INPA, "$(P)RNN:EXP:HIGH NPP")
+    field(INPB, "$(P)RNN:EXP:SUM NPP")
+    field(CALC, "A/B")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:CLASS")
+}
+
+
+# ----------------------------
+# Pick class with highest probability
+# 0 = FALLING, 1 = STABLE, 2 = RISING
+# ----------------------------
+
+record(calc, "$(P)RNN:CLASS") {
+    field(DESC, "RNN trend class result")
+    field(INPA, "$(P)RNN:LOW:PROB NPP")
+    field(INPB, "$(P)RNN:MID:PROB NPP")
+    field(INPC, "$(P)RNN:HIGH:PROB NPP")
+    field(CALC, "A>=B&&A>=C?0:B>=A&&B>=C?1:2")
+    field(PREC, "0")
+    field(FLNK, "$(P)RNN:LABEL")
+}
+
+record(mbbi, "$(P)RNN:LABEL") {
+    field(DESC, "RNN trend label")
+    field(INP,  "$(P)RNN:CLASS NPP")
+
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+
+    field(ZRST, "FALLING")
+    field(ONST, "STABLE")
+    field(TWST, "RISING")
+
+    field(FLNK, "$(P)RNN:UPDATE:XNORM")
+}
+
+
+# ----------------------------
+# Update input memory after classification
+# ----------------------------
+
+record(calcout, "$(P)RNN:UPDATE:XNORM") {
+    field(DESC, "Store current XNORM")
+    field(INPA, "$(P)RNN:XNORM NPP")
+    field(CALC, "A")
+    field(OOPT, "Every Time")
+    field(DOPT, "Use CALC")
+    field(OUT,  "$(P)RNN:PREV:XNORM PP")
+}
+

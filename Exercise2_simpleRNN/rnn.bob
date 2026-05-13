@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>RNN</name>
+  <width>600</width>
+  <height>560</height>
+  <background_color>
+    <color name="Interface Background" red="220" green="225" blue="221">
+    </color>
+  </background_color>
+  <widget type="rectangle" version="2.0.0">
+    <name>Group Background_3</name>
+    <x>410</x>
+    <y>60</y>
+    <width>190</width>
+    <height>500</height>
+    <line_width>0</line_width>
+    <line_color>
+      <color name="Group_Outline" red="150" green="155" blue="151">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Group_Background" red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Group Background_2</name>
+    <x>210</x>
+    <y>60</y>
+    <width>190</width>
+    <height>500</height>
+    <line_width>0</line_width>
+    <line_color>
+      <color name="Group_Outline" red="150" green="155" blue="151">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Group_Background" red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Titlebar</name>
+    <class>TITLE-BAR</class>
+    <x use_class="true">0</x>
+    <y use_class="true">0</y>
+    <width>600</width>
+    <height use_class="true">50</height>
+    <line_width use_class="true">0</line_width>
+    <background_color use_class="true">
+      <color name="Standard_Title_Bar" red="151" green="188" blue="202">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Title</name>
+    <class>_ESS Class Title</class>
+    <text>Recurrent neural network</text>
+    <x use_class="true">20</x>
+    <y use_class="true">0</y>
+    <width>410</width>
+    <height use_class="true">50</height>
+    <font use_class="true">
+      <font name="_ESS Title" family="Source Sans Pro" style="BOLD_ITALIC" size="36.0">
+      </font>
+    </font>
+    <foreground_color use_class="true">
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <transparent use_class="true">true</transparent>
+    <horizontal_alignment use_class="true">0</horizontal_alignment>
+    <vertical_alignment use_class="true">1</vertical_alignment>
+    <wrap_words use_class="true">false</wrap_words>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Group Background_1</name>
+    <x>10</x>
+    <y>60</y>
+    <width>190</width>
+    <height>500</height>
+    <line_width>0</line_width>
+    <line_color>
+      <color name="Group_Outline" red="150" green="155" blue="151">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Group_Background" red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>MGGrey02-title_2</name>
+    <text>Input layer</text>
+    <x>10</x>
+    <y>70</y>
+    <width>190</width>
+    <height>40</height>
+    <font>
+      <font name="_ESS Header 2" family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="RED-BORDER" red="150" green="8" blue="16">
+      </color>
+    </background_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_6</name>
+    <x>60</x>
+    <y>240</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update</name>
+    <pv_name>SYS:RNN:XNORM</pv_name>
+    <x>60</x>
+    <y>240</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_7</name>
+    <x>260</x>
+    <y>120</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_8</name>
+    <x>260</x>
+    <y>240</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_9</name>
+    <x>260</x>
+    <y>360</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_10</name>
+    <x>460</x>
+    <y>120</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_11</name>
+    <x>460</x>
+    <y>240</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_12</name>
+    <x>460</x>
+    <y>360</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_2</name>
+    <pv_name>SYS:RNN:H2</pv_name>
+    <x>260</x>
+    <y>240</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_3</name>
+    <pv_name>SYS:RNN:H3</pv_name>
+    <x>260</x>
+    <y>360</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_4</name>
+    <pv_name>SYS:RNN:LOW:PROB</pv_name>
+    <x>460</x>
+    <y>120</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_5</name>
+    <pv_name>SYS:RNN:MID:PROB</pv_name>
+    <x>460</x>
+    <y>240</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_6</name>
+    <pv_name>SYS:RNN:HIGH:PROB</pv_name>
+    <x>460</x>
+    <y>360</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_7</name>
+    <pv_name>SYS:RNN:LABEL</pv_name>
+    <x>420</x>
+    <y>450</y>
+    <width>160</width>
+    <height>70</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="24.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <rules>
+      <rule name="New Rule" prop_id="background_color" out_exp="false">
+        <exp bool_exp="pv0==0">
+          <value>
+            <color name="OK" red="65" green="229" blue="65">
+            </color>
+          </value>
+        </exp>
+        <exp bool_exp="pv0==1">
+          <value>
+            <color name="MINOR" red="255" green="235" blue="17">
+            </color>
+          </value>
+        </exp>
+        <exp bool_exp="pv0==2">
+          <value>
+            <color name="MAJOR" red="255" green="31" blue="26">
+            </color>
+          </value>
+        </exp>
+        <pv_name>SYS:RNN:CLASS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>MGGrey02-title_3</name>
+    <text>Hidden layer</text>
+    <x>210</x>
+    <y>70</y>
+    <width>190</width>
+    <height>40</height>
+    <font>
+      <font name="_ESS Header 2" family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="RED-BORDER" red="150" green="8" blue="16">
+      </color>
+    </background_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>MGGrey02-title_4</name>
+    <text>Output layer</text>
+    <x>410</x>
+    <y>70</y>
+    <width>190</width>
+    <height>40</height>
+    <font>
+      <font name="_ESS Header 2" family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="RED-BORDER" red="150" green="8" blue="16">
+      </color>
+    </background_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_1</name>
+    <pv_name>SYS:RNN:H1</pv_name>
+    <x>260</x>
+    <y>120</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_1</name>
+    <x>140</x>
+    <y>160</y>
+    <width>120</width>
+    <height>120</height>
+    <points>
+      <point x="0.0" y="119.99999999999999">
+      </point>
+      <point x="0.0" y="119.99999999999999">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_2</name>
+    <x>140</x>
+    <y>280</y>
+    <width>120</width>
+    <height>1</height>
+    <points>
+      <point x="0.0" y="1.0">
+      </point>
+      <point x="0.0" y="1.0">
+      </point>
+      <point x="119.99999999999997" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_3</name>
+    <x>140</x>
+    <y>280</y>
+    <width>120</width>
+    <height>120</height>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="120.0" y="120.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_4</name>
+    <x>340</x>
+    <y>160</y>
+    <width>120</width>
+    <height>1</height>
+    <points>
+      <point x="0.0" y="1.0">
+      </point>
+      <point x="120.00000000000001" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_5</name>
+    <x>340</x>
+    <y>280</y>
+    <width>120</width>
+    <height>1</height>
+    <points>
+      <point x="0.0" y="1.0">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_6</name>
+    <x>340</x>
+    <y>160</y>
+    <width>120</width>
+    <height>120</height>
+    <points>
+      <point x="0.0" y="120.0">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_7</name>
+    <x>340</x>
+    <y>161</y>
+    <width>120</width>
+    <height>239</height>
+    <points>
+      <point x="0.0" y="239.0">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_8</name>
+    <x>340</x>
+    <y>281</y>
+    <width>120</width>
+    <height>119</height>
+    <points>
+      <point x="0.0" y="119.0">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_9</name>
+    <x>340</x>
+    <y>400</y>
+    <width>120</width>
+    <height>1</height>
+    <points>
+      <point x="0.0" y="1.0">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_10</name>
+    <x>340</x>
+    <y>160</y>
+    <width>120</width>
+    <height>120</height>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="120.0" y="120.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_11</name>
+    <x>340</x>
+    <y>281</y>
+    <width>120</width>
+    <height>119</height>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="120.0" y="119.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_12</name>
+    <x>340</x>
+    <y>161</y>
+    <width>120</width>
+    <height>239</height>
+    <points>
+      <point x="0.0" y="0.0">
+      </point>
+      <point x="120.0" y="239.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Entry</name>
+    <pv_name>SYS:RNN:INPUT</pv_name>
+    <x>40</x>
+    <y>161</y>
+    <width>130</width>
+    <height>50</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="24.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+</display>
