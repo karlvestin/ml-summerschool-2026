@@ -14,7 +14,7 @@ require calc
 # H1=0,H2=6,H3=0, HB=-3
 
 # Load database with weights above
-dbLoadRecords("nn.db", "P=SYS:,XMIN=0,XMAX=20")
+dbLoadRecords("nn.db", "P=SYS:")
 
 #Start IOC
 iocInit()

@@ -31,7 +31,6 @@
 
 record(ai, "$(P)NN:INPUT") {
     field(DESC, "Scalar analogue input")
-    field(PINI, "1")
     field(LOPR, "$(XMIN=0)")
     field(HOPR, "$(XMAX=100)")
     field(FLNK, "$(P)NN:XNORM")
