@@ -128,7 +128,7 @@
     <width>80</width>
     <height>80</height>
     <transparent>true</transparent>
-    <precision>1</precision>
+    <precision>2</precision>
     <horizontal_alignment>1</horizontal_alignment>
     <vertical_alignment>1</vertical_alignment>
   </widget>
@@ -182,7 +182,7 @@
     <width>80</width>
     <height>80</height>
     <transparent>true</transparent>
-    <precision>1</precision>
+    <precision>2</precision>
     <horizontal_alignment>1</horizontal_alignment>
     <vertical_alignment>1</vertical_alignment>
   </widget>
@@ -194,7 +194,7 @@
     <width>80</width>
     <height>80</height>
     <transparent>true</transparent>
-    <precision>1</precision>
+    <precision>2</precision>
     <horizontal_alignment>1</horizontal_alignment>
     <vertical_alignment>1</vertical_alignment>
   </widget>
@@ -206,7 +206,7 @@
     <width>80</width>
     <height>80</height>
     <transparent>true</transparent>
-    <precision>1</precision>
+    <precision>2</precision>
     <horizontal_alignment>1</horizontal_alignment>
     <vertical_alignment>1</vertical_alignment>
   </widget>
@@ -218,7 +218,7 @@
     <width>80</width>
     <height>80</height>
     <transparent>true</transparent>
-    <precision>1</precision>
+    <precision>2</precision>
     <horizontal_alignment>1</horizontal_alignment>
     <vertical_alignment>1</vertical_alignment>
   </widget>
@@ -230,7 +230,7 @@
     <width>80</width>
     <height>80</height>
     <transparent>true</transparent>
-    <precision>1</precision>
+    <precision>2</precision>
     <horizontal_alignment>1</horizontal_alignment>
     <vertical_alignment>1</vertical_alignment>
   </widget>
@@ -503,5 +503,144 @@
       </font>
     </font>
     <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_13</name>
+    <x>60</x>
+    <y>360</y>
+    <width>80</width>
+    <height>80</height>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_8</name>
+    <pv_name>SYS:RNN:DELTA</pv_name>
+    <x>60</x>
+    <y>360</y>
+    <width>80</width>
+    <height>80</height>
+    <transparent>true</transparent>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_13</name>
+    <x>140</x>
+    <y>161</y>
+    <width>120</width>
+    <height>239</height>
+    <points>
+      <point x="0.0" y="238.99999999999997">
+      </point>
+      <point x="0.0" y="238.99999999999997">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_14</name>
+    <x>140</x>
+    <y>281</y>
+    <width>120</width>
+    <height>120</height>
+    <points>
+      <point x="0.0" y="119.99999999999999">
+      </point>
+      <point x="0.0" y="119.99999999999999">
+      </point>
+      <point x="120.00000000000001" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_15</name>
+    <x>140</x>
+    <y>401</y>
+    <width>120</width>
+    <height>1</height>
+    <points>
+      <point x="0.0" y="0.9999999999999998">
+      </point>
+      <point x="0.0" y="0.9999999999999998">
+      </point>
+      <point x="120.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>MGGrey02-title_5</name>
+    <text>Delta</text>
+    <x>30</x>
+    <y>450</y>
+    <width>140</width>
+    <height>40</height>
+    <font>
+      <font name="_ESS Header 2" family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="RED-BORDER" red="150" green="8" blue="16">
+      </color>
+    </background_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_16</name>
+    <x>260</x>
+    <y>402</y>
+    <width>80</width>
+    <height>50</height>
+    <points>
+      <point x="80.0" y="0.0">
+      </point>
+      <point x="80.0" y="50.0">
+      </point>
+      <point x="0.0" y="50.0">
+      </point>
+      <point x="0.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_17</name>
+    <x>260</x>
+    <y>161</y>
+    <width>80</width>
+    <height>50</height>
+    <points>
+      <point x="80.0" y="0.0">
+      </point>
+      <point x="80.0" y="50.0">
+      </point>
+      <point x="0.0" y="50.0">
+      </point>
+      <point x="0.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
+  </widget>
+  <widget type="polyline" version="2.0.0">
+    <name>Polyline_19</name>
+    <x>260</x>
+    <y>281</y>
+    <width>80</width>
+    <height>50</height>
+    <points>
+      <point x="80.0" y="0.0">
+      </point>
+      <point x="80.0" y="50.0">
+      </point>
+      <point x="0.0" y="50.0">
+      </point>
+      <point x="0.0" y="0.0">
+      </point>
+    </points>
+    <arrows>2</arrows>
   </widget>
 </display>
