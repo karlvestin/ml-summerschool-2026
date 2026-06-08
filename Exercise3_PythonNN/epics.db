@@ -1,0 +1,48 @@
+record(stringin, "SYS:StartDateTime")
+{
+    field(VAL, "2026-05-01 00:00")
+}
+
+record(waveform, "SYS:Forecast")
+{
+    field(FTVL, "DOUBLE")
+    field(NELM, "48")
+    field(EGU, "degC")
+}
+
+record(waveform, "SYS:ForecastTime")
+{
+    field(FTVL, "DOUBLE")
+    field(NELM, "48")
+    field(EGU, "h")
+}
+
+record(ai, "SYS:24h")
+{
+    field(EGU, "degC")
+}
+
+record(ai, "SYS:24hHIGH")
+{
+    field(EGU, "degC")
+}
+
+record(ai, "SYS:24hLOW")
+{
+    field(EGU, "degC")
+}
+
+record(ai, "SYS:48h")
+{
+    field(EGU, "degC")
+}
+
+record(ai, "SYS:48hHIGH")
+{
+    field(EGU, "degC")
+}
+
+record(ai, "SYS:48hLOW")
+{
+    field(EGU, "degC")
+}
