@@ -1,0 +1,172 @@
+[
+  {
+    "row": 0,
+    "sensors": {
+      "TT-102:MeasValue": 25.401,
+      "TT-110:MeasValue": 25.597,
+      "LI-103:MeasValue": 496.36,
+      "P-101:Speed": 92.0
+    },
+    "true_label": "No leak",
+    "true_class": 0,
+    "train_pred": 0,
+    "expected_class": 0,
+    "expected_location": "No leak",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": 0.0
+  },
+  {
+    "row": 8277,
+    "sensors": {
+      "TT-102:MeasValue": 25.699,
+      "TT-110:MeasValue": 25.61,
+      "LI-103:MeasValue": 483.15,
+      "P-101:Speed": 90.004
+    },
+    "true_label": "HBL LWU Return",
+    "true_class": 1,
+    "train_pred": 0,
+    "expected_class": 0,
+    "expected_location": "No leak",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": 0.0001
+  },
+  {
+    "row": 9192,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 456.76,
+      "P-101:Speed": 93.023
+    },
+    "true_label": "MBL Antenna Return",
+    "true_class": 2,
+    "train_pred": 2,
+    "expected_class": 2,
+    "expected_location": "MBL Antenna Return",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": 0.0
+  },
+  {
+    "row": 9142,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 509.54,
+      "P-101:Speed": 93.011
+    },
+    "true_label": "MBL Antenna Supply",
+    "true_class": 3,
+    "train_pred": 3,
+    "expected_class": 3,
+    "expected_location": "MBL Antenna Supply",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": 0.0
+  },
+  {
+    "row": 9088,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 315.53,
+      "P-101:Speed": 94.001
+    },
+    "true_label": "Spk Antenna Return",
+    "true_class": 4,
+    "train_pred": 4,
+    "expected_class": 4,
+    "expected_location": "Spk Antenna Return",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": -0.0287
+  },
+  {
+    "row": 8997,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 370.86,
+      "P-101:Speed": 92.024
+    },
+    "true_label": "Spk Antenna Supply",
+    "true_class": 5,
+    "train_pred": 5,
+    "expected_class": 5,
+    "expected_location": "Spk Antenna Supply",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": 0.0
+  },
+  {
+    "row": 8716,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 417.12,
+      "P-101:Speed": 95.004
+    },
+    "true_label": "Spk LWU Return",
+    "true_class": 6,
+    "train_pred": 6,
+    "expected_class": 6,
+    "expected_location": "Spk LWU Return",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": -0.0
+  },
+  {
+    "row": 8572,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 522.8,
+      "P-101:Speed": 92.003
+    },
+    "true_label": "Spk LWU Supply",
+    "true_class": 7,
+    "train_pred": 7,
+    "expected_class": 7,
+    "expected_location": "Spk LWU Supply",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": 0.0
+  },
+  {
+    "row": 8880,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 441.69,
+      "P-101:Speed": 94.006
+    },
+    "true_label": "Spk Window Return",
+    "true_class": 8,
+    "train_pred": 8,
+    "expected_class": 8,
+    "expected_location": "Spk Window Return",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": -0.0091
+  },
+  {
+    "row": 8794,
+    "sensors": {
+      "TT-102:MeasValue": 25.1,
+      "TT-110:MeasValue": 25.2,
+      "LI-103:MeasValue": 509.55,
+      "P-101:Speed": 92.012
+    },
+    "true_label": "Spk Window Supply",
+    "true_class": 9,
+    "train_pred": 9,
+    "expected_class": 9,
+    "expected_location": "Spk Window Supply",
+    "expected_detect": 0,
+    "expected_conf": 1.0,
+    "fwd_d_level_dt": 0.0
+  }
+]
