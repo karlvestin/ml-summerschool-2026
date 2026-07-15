@@ -3,17 +3,10 @@ require calc
 # Default input range
 # XMIN=0, XMAX=100
 
-# Default trend parameters
-# EPS=0.02      deadband for STABLE trend
-# K=100         trend sensitivity
-# R1=1.5        recurrent memory for FALLING neuron
-# R2=1.5        recurrent memory for STABLE neuron
-# R3=1.5        recurrent memory for RISING neuron
-
-# Hidden layer equations
-# H1 = sigmoid(K*(-DELTA-EPS)      + R1*H1_PREV)    # FALLING
-# H2 = sigmoid(K*( EPS-ABS(DELTA)) + R2*H2_PREV)    # STABLE
-# H3 = sigmoid(K*( DELTA-EPS)      + R3*H3_PREV)    # RISING
+# Hidden layer weights
+# W1=-50,R11=1,R12=50,R13=-1,B1=-2.5
+# W2=1,  R21=0.1,R22=0.1,R23=-0.1,B2=0.001
+# W3=50, R31=-1,R32=-50,R33=1,B3=-2.5
 
 # Output layer weights
 # FALLING: L1=6,L2=-3,L3=-6,LB=0
@@ -21,7 +14,7 @@ require calc
 # RISING:  H1O=-6,H2O=-3,H3O=6,HB=0
 
 # Load database with weights above
-dbLoadRecords("rnn.db", "P=SYS:")
+dbLoadRecords("rnn.db", "P=SYS:,W1=-50,R11=1,R12=50,R13=-1,B1=-2.5,W2=1,R21=0.1,R22=0.1,R23=-0.1,B2=0.001,W3=50, R31=-1,R32=-50,R33=1,B3=-2.5")
 
 #Start IOC
 iocInit()
