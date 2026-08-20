@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Leak Model — Training Bench</name>
+  <macros>
+    <P>CWM-CWS02:WtrC-</P>
+  </macros>
+  <width>1500</width>
+  <height>1020</height>
+  <background_color>
+    <color name="Interface Background" red="220" green="225" blue="221">
+    </color>
+  </background_color>
+  <widget type="rectangle" version="2.0.0">
+    <name>Titlebar</name>
+    <width>1500</width>
+    <height>50</height>
+    <line_width>0</line_width>
+    <background_color>
+      <color red="151" green="188" blue="202">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Title</name>
+    <text>Cooling Skid — Leak Model Training Bench</text>
+    <x>20</x>
+    <width>1000</width>
+    <height>50</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD_ITALIC" size="30.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Sim BG</name>
+    <y>530</y>
+    <width>740</width>
+    <height>350</height>
+    <line_width>0</line_width>
+    <background_color>
+      <color red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Sim Header</name>
+    <text>Live Simulation Test</text>
+    <x>54</x>
+    <y>548</y>
+    <width>440</width>
+    <height>40</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_enable</name>
+    <text>Sensors</text>
+    <x>74</x>
+    <y>596</y>
+    <width>90</width>
+    <height>34</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>btn_enable</name>
+    <pv_name>$(P)Sim:Enable</pv_name>
+    <x>164</x>
+    <y>596</y>
+    <width>150</width>
+    <height>34</height>
+    <off_label>Live PVs</off_label>
+    <off_color>
+      <color red="180" green="180" blue="180">
+      </color>
+    </off_color>
+    <on_label>Simulated</on_label>
+    <on_color>
+      <color red="60" green="120" blue="200">
+      </color>
+    </on_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_run</name>
+    <text>Stream</text>
+    <x>344</x>
+    <y>596</y>
+    <width>70</width>
+    <height>34</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>btn_run</name>
+    <pv_name>$(P)Sim:Run</pv_name>
+    <x>414</x>
+    <y>596</y>
+    <width>150</width>
+    <height>34</height>
+    <off_label>Stopped</off_label>
+    <off_color>
+      <color red="180" green="180" blue="180">
+      </color>
+    </off_color>
+    <on_label>Running</on_label>
+    <on_color>
+      <color red="40" green="180" blue="60">
+      </color>
+    </on_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_mode</name>
+    <text>Replay order</text>
+    <x>74</x>
+    <y>661</y>
+    <width>120</width>
+    <height>34</height>
+    <vertical_alignment>1</vertical_alignment>
+    <tooltip>Sim:Mode — sequential or shuffled replay of dataset rows. The old continuous synthetic-rate dial is gone; replay is the only data source now.</tooltip>
+  </widget>
+  <widget type="combo" version="2.0.0">
+    <name>cmb_mode</name>
+    <pv_name>$(P)Sim:Mode</pv_name>
+    <x>204</x>
+    <y>661</y>
+    <width>240</width>
+    <height>34</height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_scn</name>
+    <text>Replay scenario (location)</text>
+    <x>74</x>
+    <y>716</y>
+    <width>130</width>
+    <height>34</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="combo" version="2.0.0">
+    <name>cmb_scn</name>
+    <pv_name>$(P)Sim:Scenario</pv_name>
+    <x>204</x>
+    <y>716</y>
+    <width>240</width>
+    <height>34</height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_noise</name>
+    <text>Noise</text>
+    <x>74</x>
+    <y>785</y>
+    <width>130</width>
+    <height>34</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>set_noise</name>
+    <pv_name>$(P)Sim:Noise</pv_name>
+    <x>204</x>
+    <y>785</y>
+    <width>90</width>
+    <height>34</height>
+    <precision>2</precision>
+  </widget>
+  <widget type="scaledslider" version="2.0.0">
+    <name>sld_noise</name>
+    <pv_name>$(P)Sim:Noise</pv_name>
+    <x>304</x>
+    <y>785</y>
+    <width>260</width>
+    <height>34</height>
+    <maximum>2.0</maximum>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>SimSensors BG</name>
+    <x>2</x>
+    <y>100</y>
+    <width>740</width>
+    <height>380</height>
+    <line_width>0</line_width>
+    <background_color>
+      <color red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>SimSensors Header</name>
+    <text>Simulated Sensors — Replay Stream (_Sim PVs)</text>
+    <x>2</x>
+    <y>108</y>
+    <width>600</width>
+    <height>36</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="databrowser" version="2.0.0">
+    <name>trend_sim_sensors</name>
+    <file>leak_training_sim_sensors.plt</file>
+    <x>22</x>
+    <y>152</y>
+    <width>690</width>
+    <height>308</height>
+    <show_toolbar>true</show_toolbar>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>LiveSensors BG</name>
+    <x>755</x>
+    <y>100</y>
+    <width>740</width>
+    <height>380</height>
+    <line_width>0</line_width>
+    <background_color>
+      <color red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>LiveSensors Header</name>
+    <text>Live Sensors — Real Skid PVs</text>
+    <x>755</x>
+    <y>108</y>
+    <width>740</width>
+    <height>36</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="databrowser" version="2.0.0">
+    <name>trend_live_sensors</name>
+    <file>leak_training_live_sensors.plt</file>
+    <x>775</x>
+    <y>152</y>
+    <width>690</width>
+    <height>308</height>
+    <show_toolbar>true</show_toolbar>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Trend BG</name>
+    <x>756</x>
+    <y>530</y>
+    <width>740</width>
+    <height>350</height>
+    <line_width>0</line_width>
+    <background_color>
+      <color red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_detectmatch</name>
+    <text>Detection match (last sample)</text>
+    <x>773</x>
+    <y>550</y>
+    <width>200</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_detectmatch</name>
+    <pv_name>$(P)Sim:DetectMatch</pv_name>
+    <x>973</x>
+    <y>550</y>
+    <width>110</width>
+    <height>26</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <rules>
+      <rule name="detectmatch_bg" prop_id="background_color" out_exp="false">
+        <exp bool_exp="pv0==1">
+          <value>
+            <color red="200" green="235" blue="205">
+            </color>
+          </value>
+        </exp>
+        <exp bool_exp="pv0!=1">
+          <value>
+            <color red="240" green="200" blue="200">
+            </color>
+          </value>
+        </exp>
+        <pv_name>$(P)Sim:DetectMatch</pv_name>
+      </rule>
+    </rules>
+    <tooltip>Was the trustworthy leak-detected boolean correct on the last simulated sample? (Sim:DetectMatch: Correct/Wrong)</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_match</name>
+    <text>Last sample (exact location)</text>
+    <x>773</x>
+    <y>586</y>
+    <width>200</width>
+    <height>40</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>led_match</name>
+    <pv_name>$(P)Sim:Match</pv_name>
+    <x>973</x>
+    <y>588</y>
+    <width>36</width>
+    <height>36</height>
+    <off_color>
+      <color red="200" green="40" blue="40">
+      </color>
+    </off_color>
+    <on_color>
+      <color red="40" green="180" blue="60">
+      </color>
+    </on_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_nsamp</name>
+    <text>Samples scored</text>
+    <x>1156</x>
+    <y>548</y>
+    <width>200</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_nsamp</name>
+    <pv_name>$(P)Sim:NSamples</pv_name>
+    <x>1356</x>
+    <y>548</y>
+    <width>110</width>
+    <height>26</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_runacc</name>
+    <text>Exact-location match %</text>
+    <x>1156</x>
+    <y>582</y>
+    <width>200</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_runacc</name>
+    <pv_name>$(P)Sim:RunAcc</pv_name>
+    <x>1356</x>
+    <y>582</y>
+    <width>110</width>
+    <height>26</height>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_rundetectacc</name>
+    <text>Detection acc %</text>
+    <x>1156</x>
+    <y>616</y>
+    <width>200</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_rundetectacc</name>
+    <pv_name>$(P)Sim:RunDetectAcc</pv_name>
+    <x>1356</x>
+    <y>616</y>
+    <width>110</width>
+    <height>26</height>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>btn_reset</name>
+    <actions>
+      <action type="write_pv">
+        <description>Zero the session scoreboard</description>
+        <pv_name>$(P)Sim:Reset</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <text>Reset scoreboard</text>
+    <x>1014</x>
+    <y>665</y>
+    <width>250</width>
+    <height>32</height>
+    <tooltip>Zero NSamples / RunAcc / RunDetectAcc</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button</name>
+    <actions>
+      <action type="open_display">
+        <description>Open Display</description>
+        <file>training_details.bob</file>
+        <target>window</target>
+      </action>
+    </actions>
+    <text>Training details display</text>
+    <x>654</x>
+    <y>60</y>
+    <width>190</width>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="16.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="MASKED" red="255" green="175" blue="81">
+      </color>
+    </background_color>
+    <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_true</name>
+    <text>TRUE location (simulated)</text>
+    <x>830</x>
+    <y>740</y>
+    <width>290</width>
+    <height>26</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_true</name>
+    <pv_name>$(P)Sim:TrueLocation</pv_name>
+    <x>830</x>
+    <y>766</y>
+    <width>290</width>
+    <height>56</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="30.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="30" green="130" blue="50">
+      </color>
+    </foreground_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_pred</name>
+    <text>PREDICTED location (live or simulation)</text>
+    <x>1130</x>
+    <y>740</y>
+    <width>290</width>
+    <height>26</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_pred</name>
+    <pv_name>$(P)LeakML:LocationHint</pv_name>
+    <x>1130</x>
+    <y>766</y>
+    <width>290</width>
+    <height>56</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="30.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <rules>
+      <rule name="match_color" prop_id="foreground_color" out_exp="false">
+        <exp bool_exp="pv0==1">
+          <value>
+            <color red="30" green="140" blue="50">
+            </color>
+          </value>
+        </exp>
+        <exp bool_exp="pv0!=1">
+          <value>
+            <color red="180" green="40" blue="40">
+            </color>
+          </value>
+        </exp>
+        <pv_name>$(P)Sim:DetectMatch</pv_name>
+      </rule>
+    </rules>
+    <tooltip>The trustworthy model output (leak vs no-leak), coloured by whether Sim:DetectMatch was correct on the last sample.</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>note_gate</name>
+    <text>This bench shows the TREE's advisory location on replayed data.</text>
+    <x>830</x>
+    <y>837</y>
+    <width>580</width>
+    <height>43</height>
+    <font>
+      <font family="Source Sans Pro" style="ITALIC" size="18.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="90" green="90" blue="90">
+      </color>
+    </foreground_color>
+  </widget>
+</display>

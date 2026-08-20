@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>RNN</name>
+  <width>1140</width>
+  <height>900</height>
+  <background_color>
+    <color name="Interface Background" red="220" green="225" blue="221">
+    </color>
+  </background_color>
+  <widget type="rectangle" version="2.0.0">
+    <name>Group Background_4</name>
+    <x>20</x>
+    <y>70</y>
+    <width>200</width>
+    <height>810</height>
+    <line_width>0</line_width>
+    <line_color>
+      <color name="Group_Outline" red="150" green="155" blue="151">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Group_Background" red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Group Background_6</name>
+    <x>230</x>
+    <y>70</y>
+    <width>440</width>
+    <height>810</height>
+    <line_width>0</line_width>
+    <line_color>
+      <color name="Group_Outline" red="150" green="155" blue="151">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Group_Background" red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Group Background_7</name>
+    <x>680</x>
+    <y>70</y>
+    <width>440</width>
+    <height>810</height>
+    <line_width>0</line_width>
+    <line_color>
+      <color name="Group_Outline" red="150" green="155" blue="151">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Group_Background" red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Titlebar</name>
+    <class>TITLE-BAR</class>
+    <x use_class="true">0</x>
+    <y use_class="true">0</y>
+    <width>1140</width>
+    <height use_class="true">50</height>
+    <line_width use_class="true">0</line_width>
+    <background_color use_class="true">
+      <color name="Standard_Title_Bar" red="151" green="188" blue="202">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Title</name>
+    <class>_ESS Class Title</class>
+    <text>Recurrent Neural Network</text>
+    <x use_class="true">20</x>
+    <y use_class="true">0</y>
+    <width>410</width>
+    <height use_class="true">50</height>
+    <font use_class="true">
+      <font name="_ESS Title" family="Source Sans Pro" style="BOLD_ITALIC" size="36.0">
+      </font>
+    </font>
+    <foreground_color use_class="true">
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <transparent use_class="true">true</transparent>
+    <horizontal_alignment use_class="true">0</horizontal_alignment>
+    <vertical_alignment use_class="true">1</vertical_alignment>
+    <wrap_words use_class="true">false</wrap_words>
+  </widget>
+  <widget type="picture" version="2.0.0">
+    <name>Picture</name>
+    <file>Arrows.svg</file>
+    <x>23</x>
+    <y>183</y>
+    <width>1085</width>
+    <height>686</height>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_19</name>
+    <x>399</x>
+    <y>436</y>
+    <height>100</height>
+    <line_width>10</line_width>
+    <line_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="White" red="255" green="255" blue="255">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_20</name>
+    <x>399</x>
+    <y>679</y>
+    <height>100</height>
+    <line_width>10</line_width>
+    <line_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="White" red="255" green="255" blue="255">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_21</name>
+    <x>399</x>
+    <y>194</y>
+    <height>100</height>
+    <line_width>10</line_width>
+    <line_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="White" red="255" green="255" blue="255">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="ellipse" version="2.0.0">
+    <name>Ellipse_22</name>
+    <x>70</x>
+    <y>436</y>
+    <height>100</height>
+    <line_width>10</line_width>
+    <line_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="White" red="255" green="255" blue="255">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>MGGrey02-title_5</name>
+    <text>Input layer</text>
+    <x>20</x>
+    <y>70</y>
+    <width>200</width>
+    <height>50</height>
+    <font>
+      <font name="_ESS Header 2" family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="RED-BORDER" red="150" green="8" blue="16">
+      </color>
+    </background_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Entry_1</name>
+    <pv_name>SYS:RNN:INPUT</pv_name>
+    <x>70</x>
+    <y>120</y>
+    <height>30</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>MGGrey02-title_6</name>
+    <text>Hidden layer</text>
+    <x>230</x>
+    <y>70</y>
+    <width>440</width>
+    <height>50</height>
+    <font>
+      <font name="_ESS Header 2" family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="RED-BORDER" red="150" green="8" blue="16">
+      </color>
+    </background_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>MGGrey02-title_7</name>
+    <text>Output layer</text>
+    <x>680</x>
+    <y>70</y>
+    <width>440</width>
+    <height>50</height>
+    <font>
+      <font name="_ESS Header 2" family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="RED-BORDER" red="150" green="8" blue="16">
+      </color>
+    </background_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_11</name>
+    <pv_name>SYS:RNN:H3</pv_name>
+    <x>409</x>
+    <y>689</y>
+    <width>80</width>
+    <height>80</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <transparent>true</transparent>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_12</name>
+    <pv_name>SYS:RNN:H2</pv_name>
+    <x>409</x>
+    <y>446</y>
+    <width>80</width>
+    <height>80</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <transparent>true</transparent>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_13</name>
+    <pv_name>SYS:RNN:H1</pv_name>
+    <x>409</x>
+    <y>204</y>
+    <width>80</width>
+    <height>80</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <transparent>true</transparent>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_14</name>
+    <pv_name>SYS:RNN:XNORM</pv_name>
+    <x>80</x>
+    <y>446</y>
+    <width>80</width>
+    <height>80</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <transparent>true</transparent>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Rectangle</name>
+    <x>20</x>
+    <y>162</y>
+    <width>1100</width>
+    <height>3</height>
+    <line_width>0</line_width>
+    <background_color>
+      <color name="Background" red="220" green="225" blue="221">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_15</name>
+    <pv_name>SYS:RNN:Trend</pv_name>
+    <x>832</x>
+    <y>120</y>
+    <width>135</width>
+    <height>30</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <rules>
+      <rule name="New Rule" prop_id="background_color" out_exp="false">
+        <exp bool_exp="pv0==0">
+          <value>
+            <color name="OK" red="65" green="229" blue="65">
+            </color>
+          </value>
+        </exp>
+        <exp bool_exp="pv0==1">
+          <value>
+            <color name="MINOR" red="255" green="235" blue="17">
+            </color>
+          </value>
+        </exp>
+        <exp bool_exp="pv0==2">
+          <value>
+            <color name="MAJOR" red="255" green="31" blue="26">
+            </color>
+          </value>
+        </exp>
+        <pv_name>SYS:RNN:CLASS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="picture" version="2.0.0">
+    <name>Picture_1</name>
+    <file>Arrows.svg</file>
+    <x>400</x>
+    <y>1190</y>
+    <width>1</width>
+    <height>1</height>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>LED</name>
+    <pv_name>SYS:RNN:Prob_Falling_Stat</pv_name>
+    <x>983</x>
+    <y>204</y>
+    <width>100</width>
+    <height>100</height>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>LED_1</name>
+    <pv_name>SYS:RNN:Prob_Stable_Stat</pv_name>
+    <x>983</x>
+    <y>436</y>
+    <width>100</width>
+    <height>100</height>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>LED_2</name>
+    <pv_name>SYS:RNN:Prob_Rising_Stat</pv_name>
+    <x>983</x>
+    <y>679</y>
+    <width>100</width>
+    <height>100</height>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_8</name>
+    <pv_name>SYS:RNN:Prob_Falling</pv_name>
+    <x>993</x>
+    <y>214</y>
+    <width>80</width>
+    <height>80</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <background_color>
+      <color name="Transparent" red="255" green="255" blue="255" alpha="0">
+      </color>
+    </background_color>
+    <transparent>true</transparent>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_color>
+      <color name="Transparent" red="255" green="255" blue="255" alpha="0">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_9</name>
+    <pv_name>SYS:RNN:Prob_Stable</pv_name>
+    <x>995</x>
+    <y>446</y>
+    <width>80</width>
+    <height>80</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <transparent>true</transparent>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_10</name>
+    <pv_name>SYS:RNN:Prob_Rising</pv_name>
+    <x>984</x>
+    <y>689</y>
+    <width>80</width>
+    <height>80</height>
+    <font>
+      <font name="_ESS Header 3" family="Source Sans Pro" style="BOLD" size="18.0">
+      </font>
+    </font>
+    <transparent>true</transparent>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label</name>
+    <text>Falling</text>
+    <x>985</x>
+    <y>172</y>
+    <font>
+      <font family="Source Sans Pro" style="BOLD_ITALIC" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_1</name>
+    <text>Stable</text>
+    <x>985</x>
+    <y>400</y>
+    <font>
+      <font family="Source Sans Pro" style="BOLD_ITALIC" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_2</name>
+    <text>Rising</text>
+    <x>985</x>
+    <y>790</y>
+    <font>
+      <font family="Source Sans Pro" style="BOLD_ITALIC" size="16.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+</display>

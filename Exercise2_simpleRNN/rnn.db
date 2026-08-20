@@ -33,9 +33,9 @@
 # Input scalar analogue value
 # ----------------------------
 
-record(ai, "$(P)RNN:INPUT") {
+record(ao, "$(P)RNN:INPUT") {
     field(DESC, "Scalar analogue input")
-    #field(PINI, "1")
+    field(DTYP, "Soft Channel")
     field(LOPR, "$(XMIN=0)")
     field(HOPR, "$(XMAX=100)")
     field(FLNK, "$(P)RNN:XNORM")
@@ -51,251 +51,203 @@ record(calc, "$(P)RNN:XNORM") {
     field(INPA, "$(P)RNN:INPUT NPP")
     field(CALC, "((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))<0?0:((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))>1?1:((A-$(XMIN=0))/($(XMAX=100)-$(XMIN=0)))")
     field(PREC, "5")
-    field(FLNK, "$(P)RNN:DELTA")
+    field(FLNK, "$(P)RNN:H1SUM")
 }
 
 
-# ----------------------------
-# Input memory and trend delta
-# ----------------------------
-
-record(ao, "$(P)RNN:PREV:XNORM") {
-    field(DESC, "Previous normalized input")
-    field(PREC, "5")
-    field(LOPR, "0")
-    field(HOPR, "1")
-}
-
-record(calc, "$(P)RNN:DELTA") {
-    field(DESC, "Input trend delta")
+#--- hidden layer: h = sigmoid(Wxh*x + Whh*h_prev + bh) ---
+# INPA = x_t ; INPB/C/D = h1/h2/h3 from the PREVIOUS tick (recurrence)
+record(calc, "$(P)RNN:H1SUM") {
+    field(DESC, "hidden1 pre-activation")
     field(INPA, "$(P)RNN:XNORM NPP")
-    field(INPB, "$(P)RNN:PREV:XNORM NPP")
-    field(INPC, "$(P)RNN:PREV:XNORM.UDF NPP")
-    field(CALC, "C?0:A-B")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:H1:SUM")
-}
-
-
-# ----------------------------
-# Hidden neuron 1: FALLING detector
-#
-# Uses previous H1 value directly through INPB.
-# ----------------------------
-
-record(calc, "$(P)RNN:H1:SUM") {
-    field(DESC, "Hidden 1 falling sum")
-    field(INPA, "$(P)RNN:DELTA NPP")
-    field(INPB, "$(P)RNN:H1 NPP")
-    field(CALC, "$(K=100)*(-A-$(EPS=0.02))+$(R1=1.5)*B")
-    field(PREC, "5")
+    field(INPB, "$(P)RNN:H1P NPP")
+    field(INPC, "$(P)RNN:H2P NPP")
+    field(INPD, "$(P)RNN:H3P NPP")
+    field(CALC, "2.610053*A-1.229400*B+0.389088*C+0.111757*D-0.993523") 
     field(FLNK, "$(P)RNN:H1")
 }
-
 record(calc, "$(P)RNN:H1") {
-    field(DESC, "Hidden 1 falling activation")
-    field(INPA, "$(P)RNN:H1:SUM NPP")
+    field(DESC, "hidden1 sigmoid")
+    field(INPA, "$(P)RNN:H1SUM NPP")
     field(CALC, "1/(1+EXP(-A))")
     field(PREC, "5")
-    field(FLNK, "$(P)RNN:H2:SUM")
+    field(FLNK, "$(P)RNN:H2SUM")
 }
-
-
-# ----------------------------
-# Hidden neuron 2: STABLE detector
-#
-# Uses previous H2 value directly through INPB.
-# ----------------------------
-
-record(calc, "$(P)RNN:H2:SUM") {
-    field(DESC, "Hidden 2 stable sum")
-    field(INPA, "$(P)RNN:DELTA NPP")
-    field(INPB, "$(P)RNN:H2 NPP")
-    field(CALC, "$(K=100)*($(EPS=0.02)-ABS(A))+$(R2=1.5)*B")
-    field(PREC, "5")
+record(calc, "$(P)RNN:H2SUM") {
+    field(DESC, "hidden2 pre-activation")
+    field(INPA, "$(P)RNN:XNORM NPP")
+    field(INPB, "$(P)RNN:H1P NPP")
+    field(INPC, "$(P)RNN:H2P NPP")
+    field(INPD, "$(P)RNN:H3P NPP")
+    field(CALC,  "4.688208*A-10.916350*B+3.052341*C+0.845389*D+1.122133") 
     field(FLNK, "$(P)RNN:H2")
 }
-
 record(calc, "$(P)RNN:H2") {
-    field(DESC, "Hidden 2 stable activation")
-    field(INPA, "$(P)RNN:H2:SUM NPP")
+    field(DESC, "hidden2 sigmoid")
+    field(INPA, "$(P)RNN:H2SUM NPP")
     field(CALC, "1/(1+EXP(-A))")
     field(PREC, "5")
-    field(FLNK, "$(P)RNN:H3:SUM")
+    field(FLNK, "$(P)RNN:H3SUM")
 }
-
-
-# ----------------------------
-# Hidden neuron 3: RISING detector
-#
-# Uses previous H3 value directly through INPB.
-# ----------------------------
-
-record(calc, "$(P)RNN:H3:SUM") {
-    field(DESC, "Hidden 3 rising sum")
-    field(INPA, "$(P)RNN:DELTA NPP")
-    field(INPB, "$(P)RNN:H3 NPP")
-    field(CALC, "$(K=100)*(A-$(EPS=0.02))+$(R3=1.5)*B")
-    field(PREC, "5")
+record(calc, "$(P)RNN:H3SUM") {
+    field(DESC, "hidden3 pre-activation")
+    field(INPA, "$(P)RNN:XNORM NPP")
+    field(INPB, "$(P)RNN:H1P NPP")
+    field(INPC, "$(P)RNN:H2P NPP")
+    field(INPD, "$(P)RNN:H3P NPP")
+    field(CALC, "-15.884566*A+28.358418*B-7.387254*C-1.968287*D-1.157693") 
     field(FLNK, "$(P)RNN:H3")
 }
-
 record(calc, "$(P)RNN:H3") {
-    field(DESC, "Hidden 3 rising activation")
-    field(INPA, "$(P)RNN:H3:SUM NPP")
+    field(DESC, "hidden3 sigmoid")
+    field(INPA, "$(P)RNN:H3SUM NPP")
     field(CALC, "1/(1+EXP(-A))")
     field(PREC, "5")
-    field(FLNK, "$(P)RNN:LOW:SUM")
+    field(FLNK, "$(P)RNN:Z1")
 }
 
-
-# ----------------------------
-# Three-class output scores
-#
-# To minimize changes from the first exercise:
-#   LOW  records now mean FALLING
-#   MID  records now mean STABLE
-#   HIGH records now mean RISING
-# ----------------------------
-
-record(calc, "$(P)RNN:LOW:SUM") {
-    field(DESC, "FALLING class score")
+#--- output logits: z = Why*h + by ---
+record(calc, "$(P)RNN:Z1") {
+    field(DESC, "logit Increasing")
     field(INPA, "$(P)RNN:H1 NPP")
     field(INPB, "$(P)RNN:H2 NPP")
     field(INPC, "$(P)RNN:H3 NPP")
-    field(CALC, "$(L1=6)*A+$(L2=-3)*B+$(L3=-6)*C+$(LB=0)")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:MID:SUM")
+    field(CALC, "5.493579*A+18.733213*B-35.217319*C+2.195953") 
+    field(FLNK, "$(P)RNN:Z2")
 }
-
-record(calc, "$(P)RNN:MID:SUM") {
-    field(DESC, "STABLE class score")
+record(calc, "$(P)RNN:Z2") {
+    field(DESC, "logit Stable")
     field(INPA, "$(P)RNN:H1 NPP")
     field(INPB, "$(P)RNN:H2 NPP")
     field(INPC, "$(P)RNN:H3 NPP")
-    field(CALC, "$(M1=-4)*A+$(M2=6)*B+$(M3=-4)*C+$(MB=0)")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:HIGH:SUM")
+    field(CALC, "1.113441*A-0.137917*B+1.186039*C+1.146973") 
+    field(FLNK, "$(P)RNN:Z3")
 }
-
-record(calc, "$(P)RNN:HIGH:SUM") {
-    field(DESC, "RISING class score")
+record(calc, "$(P)RNN:Z3") {
+    field(DESC, "logit Decreasing")
     field(INPA, "$(P)RNN:H1 NPP")
     field(INPB, "$(P)RNN:H2 NPP")
     field(INPC, "$(P)RNN:H3 NPP")
-    field(CALC, "$(H1O=-6)*A+$(H2O=-3)*B+$(H3O=6)*C+$(HB=0)")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:EXP:LOW")
+    field(CALC, "-7.128529*A-23.056977*B+34.451607*C-4.095017") 
+    field(FLNK, "$(P)RNN:ZMAX")
 }
 
-
-# ----------------------------
-# Softmax probabilities
-# ----------------------------
-
-record(calc, "$(P)RNN:EXP:LOW") {
-    field(DESC, "exp falling score")
-    field(INPA, "$(P)RNN:LOW:SUM NPP")
-    field(CALC, "EXP(A)")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:EXP:MID")
+#--- softmax (max-subtracted for numerical stability) ---
+record(calc, "$(P)RNN:ZMAX") {
+    field(DESC, "max logit")
+    field(INPA, "$(P)RNN:Z1 NPP")
+    field(INPB, "$(P)RNN:Z2 NPP")
+    field(INPC, "$(P)RNN:Z3 NPP")
+    field(CALC, "MAX(A,B,C)")
+    field(FLNK, "$(P)RNN:Prob_Rising")
+}
+record(calc, "$(P)RNN:Prob_Rising") {
+    field(DESC, "P(Increasing)")
+    field(INPA, "$(P)RNN:Z1 NPP")
+    field(INPB, "$(P)RNN:Z2 NPP")
+    field(INPC, "$(P)RNN:Z3 NPP")
+    field(INPD, "$(P)RNN:ZMAX NPP")
+    field(CALC, "EXP(A-D)/(EXP(A-D)+EXP(B-D)+EXP(C-D))")
+    field(PREC, "4")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(FLNK, "$(P)RNN:Prob_Stable")
 }
 
-record(calc, "$(P)RNN:EXP:MID") {
-    field(DESC, "exp stable score")
-    field(INPA, "$(P)RNN:MID:SUM NPP")
-    field(CALC, "EXP(A)")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:EXP:HIGH")
+record(calc, "$(P)RNN:Prob_Stable") {
+    field(DESC, "P(Stable)")
+    field(INPA, "$(P)RNN:Z1 NPP")
+    field(INPB, "$(P)RNN:Z2 NPP")
+    field(INPC, "$(P)RNN:Z3 NPP")
+    field(INPD, "$(P)RNN:ZMAX NPP")
+    field(CALC, "EXP(B-D)/(EXP(A-D)+EXP(B-D)+EXP(C-D))")
+    field(PREC, "4")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(FLNK, "$(P)RNN:Prob_Falling")
 }
-
-record(calc, "$(P)RNN:EXP:HIGH") {
-    field(DESC, "exp rising score")
-    field(INPA, "$(P)RNN:HIGH:SUM NPP")
-    field(CALC, "EXP(A)")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:EXP:SUM")
-}
-
-record(calc, "$(P)RNN:EXP:SUM") {
-    field(DESC, "softmax denominator")
-    field(INPA, "$(P)RNN:EXP:LOW NPP")
-    field(INPB, "$(P)RNN:EXP:MID NPP")
-    field(INPC, "$(P)RNN:EXP:HIGH NPP")
-    field(CALC, "A+B+C")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:LOW:PROB")
-}
-
-record(calc, "$(P)RNN:LOW:PROB") {
-    field(DESC, "FALLING probability")
-    field(INPA, "$(P)RNN:EXP:LOW NPP")
-    field(INPB, "$(P)RNN:EXP:SUM NPP")
-    field(CALC, "A/B")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:MID:PROB")
-}
-
-record(calc, "$(P)RNN:MID:PROB") {
-    field(DESC, "STABLE probability")
-    field(INPA, "$(P)RNN:EXP:MID NPP")
-    field(INPB, "$(P)RNN:EXP:SUM NPP")
-    field(CALC, "A/B")
-    field(PREC, "5")
-    field(FLNK, "$(P)RNN:HIGH:PROB")
-}
-
-record(calc, "$(P)RNN:HIGH:PROB") {
-    field(DESC, "RISING probability")
-    field(INPA, "$(P)RNN:EXP:HIGH NPP")
-    field(INPB, "$(P)RNN:EXP:SUM NPP")
-    field(CALC, "A/B")
-    field(PREC, "5")
+record(calc, "$(P)RNN:Prob_Falling") {
+    field(DESC, "P(Decreasing)")
+    field(INPA, "$(P)RNN:Z1 NPP")
+    field(INPB, "$(P)RNN:Z2 NPP")
+    field(INPC, "$(P)RNN:Z3 NPP")
+    field(INPD, "$(P)RNN:ZMAX NPP")
+    field(CALC, "EXP(C-D)/(EXP(A-D)+EXP(B-D)+EXP(C-D))")
+    field(PREC, "4")
+    field(LOPR, "0")
+    field(HOPR, "1")
     field(FLNK, "$(P)RNN:CLASS")
 }
 
-
-# ----------------------------
-# Pick class with highest probability
-# 0 = FALLING, 1 = STABLE, 2 = RISING
-# ----------------------------
-
+#--- argmax of the probabilities -> class index 0/1/2 ---
 record(calc, "$(P)RNN:CLASS") {
-    field(DESC, "RNN trend class result")
-    field(INPA, "$(P)RNN:LOW:PROB NPP")
-    field(INPB, "$(P)RNN:MID:PROB NPP")
-    field(INPC, "$(P)RNN:HIGH:PROB NPP")
-    field(CALC, "A>=B&&A>=C?0:B>=A&&B>=C?1:2")
-    field(PREC, "0")
-    field(FLNK, "$(P)RNN:LABEL")
+    field(DESC, "argmax class index")
+    field(INPA, "$(P)RNN:Prob_Rising NPP")
+    field(INPB, "$(P)RNN:Prob_Stable NPP")
+    field(INPC, "$(P)RNN:Prob_Falling NPP")
+    field(CALC, "(A>=B)&&(A>=C)?0:(B>=C?1:2)")
+    field(FLNK, "$(P)RNN:Prob_Rising_Stat")
 }
 
-record(mbbi, "$(P)RNN:LABEL") {
-    field(DESC, "RNN trend label")
+
+record(calc, "$(P)RNN:Prob_Rising_Stat") {
+    field(DESC, "P(Increasing)")
+    field(INPA, "$(P)RNN:CLASS NPP")
+    field(CALC, "A=0")
+    field(FLNK, "$(P)RNN:Prob_Stable_Stat")
+}
+
+record(calc, "$(P)RNN:Prob_Stable_Stat") {
+    field(DESC, "P(Stable)")
+    field(INPA, "$(P)RNN:CLASS NPP")
+    field(CALC, "A=1")
+    field(FLNK, "$(P)RNN:Prob_Falling_Stat")
+}
+record(calc, "$(P)RNN:Prob_Falling_Stat") {
+    field(DESC, "P(Decreasing)")
+    field(INPA, "$(P)RNN:CLASS NPP")
+    field(CALC, "A=2")
+    field(FLNK, "$(P)RNN:Trend")
+}
+
+# Final human-readable trend (multi-bit binary input).
+record(mbbi, "$(P)RNN:Trend") {
+    field(DESC, "trend classification")
+    field(DTYP, "Soft Channel")
     field(INP,  "$(P)RNN:CLASS NPP")
-
+    field(NOBT, "2")
     field(ZRVL, "0")
+    field(ZRST, "Increasing")
     field(ONVL, "1")
+    field(ONST, "Stable")
     field(TWVL, "2")
-
-    field(ZRST, "FALLING")
-    field(ONST, "STABLE")
-    field(TWST, "RISING")
-
-    field(FLNK, "$(P)RNN:UPDATE:XNORM")
+    field(TWST, "Decreasing")
+    field(ZRSV, "MAJOR")
+    field(ONSV, "NO_ALARM")
+    field(TWSV, "MINOR")
+    field(FLNK, "$(P)RNN:H1P")
 }
 
-
-# ----------------------------
-# Update input memory after classification
-# ----------------------------
-
-record(calcout, "$(P)RNN:UPDATE:XNORM") {
-    field(DESC, "Store current XNORM")
-    field(INPA, "$(P)RNN:XNORM NPP")
+#--- latch hidden state for the next sample (the recurrence) ---
+# Processed LAST, after the logits/softmax have already consumed the
+# OLD h_prev, so these become h_{t-1} for the next clock tick.
+record(calc, "$(P)RNN:H1P") {
+    field(DESC, "h1(t-1) recurrent memory")
+    field(INPA, "$(P)RNN:H1 NPP")
     field(CALC, "A")
-    field(OOPT, "Every Time")
-    field(DOPT, "Use CALC")
-    field(OUT,  "$(P)RNN:PREV:XNORM PP")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H2P")
 }
-
+record(calc, "$(P)RNN:H2P") {
+    field(DESC, "h2(t-1) recurrent memory")
+    field(INPA, "$(P)RNN:H2 NPP")
+    field(CALC, "A")
+    field(PREC, "5")
+    field(FLNK, "$(P)RNN:H3P")
+}
+record(calc, "$(P)RNN:H3P") {
+    field(DESC, "h3(t-1) recurrent memory")
+    field(INPA, "$(P)RNN:H3 NPP")
+    field(CALC, "A")
+    field(PREC, "5")
+}

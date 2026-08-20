@@ -1,0 +1,4 @@
+# EPICS/E3 build output (created by `make install`).
+O.*/
+# Python bytecode cache.
+__pycache__/

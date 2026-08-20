@@ -1,0 +1,5 @@
+# leak_predict.dbd — register the aSub subroutines so the IOC can resolve the
+# INAM/SNAM names referenced in leak_predict.db. The aSub record type itself is
+# provided by EPICS base (asubRecord.dbd), pulled in via require/base.
+function(leakPredictInit)
+function(leakPredict)

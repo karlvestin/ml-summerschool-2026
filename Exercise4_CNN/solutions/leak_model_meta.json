@@ -1,0 +1,262 @@
+{
+  "task": "leak_location_classification",
+  "feature_names": [
+    "delta_T",
+    "TT102",
+    "level_corrected",
+    "d_correctedLev_dt",
+    "P_speed",
+    "speed_over_deltaT"
+  ],
+  "feat_min": [
+    -0.28563852745463336,
+    25.099874388896236,
+    256.37201065425694,
+    -0.37785154549246724,
+    88.00017402012926,
+    27.34150647084694
+  ],
+  "feat_max": [
+    3.2185561579776163,
+    32.59992612648037,
+    556.3477994914742,
+    0.016539310763587077,
+    95.51226511345934,
+    191.02453022691867
+  ],
+  "feat_range": [
+    3.5041946854322497,
+    7.500051737584133,
+    299.9757888372173,
+    0.3943908562560543,
+    7.512091093330071,
+    163.68302375607172
+  ],
+  "beta_thermal": 6.918462201339541,
+  "t_ref": 29.94861682047336,
+  "n_classes": 10,
+  "class_to_label": {
+    "0": "No leak",
+    "1": "HBL LWU Return",
+    "2": "MBL Antenna Return",
+    "3": "MBL Antenna Supply",
+    "4": "Spk Antenna Return",
+    "5": "Spk Antenna Supply",
+    "6": "Spk LWU Return",
+    "7": "Spk LWU Supply",
+    "8": "Spk Window Return",
+    "9": "Spk Window Supply"
+  },
+  "label_to_class": {
+    "No leak": 0,
+    "HBL LWU Return": 1,
+    "MBL Antenna Return": 2,
+    "MBL Antenna Supply": 3,
+    "Spk Antenna Return": 4,
+    "Spk Antenna Supply": 5,
+    "Spk LWU Return": 6,
+    "Spk LWU Supply": 7,
+    "Spk Window Return": 8,
+    "Spk Window Supply": 9
+  },
+  "class_side": {
+    "0": "",
+    "1": "Return",
+    "2": "Return",
+    "3": "Supply",
+    "4": "Return",
+    "5": "Supply",
+    "6": "Return",
+    "7": "Supply",
+    "8": "Return",
+    "9": "Supply"
+  },
+  "model_type": "decision_tree",
+  "hyperparams": {
+    "max_depth": 12,
+    "min_leaf_size": 3,
+    "min_gain_split": 1e-07
+  },
+  "d_level_dt": {
+    "window_samples": 12,
+    "vent_step_mm": 4.0,
+    "gap_seconds": 300.0,
+    "slope_on": "level_corrected",
+    "method": "windowed_lstsq_slope"
+  },
+  "verification_gates": {
+    "level_importance": 0.5559796437659034,
+    "level_pass": true,
+    "cv_balacc_mean": 0.95629239930992,
+    "cv_balacc_std": 0.011960240510487455,
+    "cv_macrof1_mean": 0.9540826306954399
+  },
+  "metrics_rowlevel_optimistic": {
+    "train": {
+      "acc": 0.9987640970183841,
+      "bal_acc": 0.9880385245535079,
+      "macro_f1": 0.986733306546793
+    },
+    "val": {
+      "acc": 0.9951298701298701,
+      "bal_acc": 0.9549216300940438,
+      "macro_f1": 0.9516475095785439
+    },
+    "test": {
+      "acc": 0.9935622317596566,
+      "bal_acc": 0.9525,
+      "macro_f1": 0.9522923537632068
+    },
+    "test_balanced_accuracy": 0.9525,
+    "test_macro_f1": 0.9522923537632068
+  },
+  "honest_leave_one_event_out": {
+    "note": "Each leak location is one contiguous drain event; held out whole, so exact-location recall is 0 by construction. Only leak detection and (weakly) Supply/Return generalise \u2014 location is an instrumentation gap, not a modelling one.",
+    "leak_detection_recall": 0.8845029239766081,
+    "supply_return_accuracy": 0.5011401194592301,
+    "exact_location_recall": 0.0,
+    "noleak_false_positive_rate": 0.14070048309178743,
+    "per_event": [
+      {
+        "location": "HBL LWU Return",
+        "detect": 0.0,
+        "side": "Return",
+        "side_acc": 0.0,
+        "mapped_to": "No leak"
+      },
+      {
+        "location": "Spk LWU Supply",
+        "detect": 0.9605263157894737,
+        "side": "Supply",
+        "side_acc": 0.4657534246575342,
+        "mapped_to": "MBL Antenna Return"
+      },
+      {
+        "location": "Spk LWU Return",
+        "detect": 1.0,
+        "side": "Return",
+        "side_acc": 0.9452054794520548,
+        "mapped_to": "Spk Window Return"
+      },
+      {
+        "location": "Spk Window Supply",
+        "detect": 1.0,
+        "side": "Supply",
+        "side_acc": 0.8513513513513513,
+        "mapped_to": "MBL Antenna Supply"
+      },
+      {
+        "location": "Spk Window Return",
+        "detect": 1.0,
+        "side": "Return",
+        "side_acc": 0.625,
+        "mapped_to": "Spk LWU Return"
+      },
+      {
+        "location": "Spk Antenna Supply",
+        "detect": 1.0,
+        "side": "Supply",
+        "side_acc": 0.0,
+        "mapped_to": "Spk LWU Return"
+      },
+      {
+        "location": "Spk Antenna Return",
+        "detect": 1.0,
+        "side": "Return",
+        "side_acc": 0.0,
+        "mapped_to": "Spk Antenna Supply"
+      },
+      {
+        "location": "MBL Antenna Supply",
+        "detect": 1.0,
+        "side": "Supply",
+        "side_acc": 1.0,
+        "mapped_to": "Spk Window Supply"
+      },
+      {
+        "location": "MBL Antenna Return",
+        "detect": 1.0,
+        "side": "Return",
+        "side_acc": 0.6229508196721312,
+        "mapped_to": "Spk Window Return"
+      }
+    ]
+  },
+  "observability_caveat": "P&ID M02430: one supply + one return port; all section/component branches merge off-skid. Component and section axes are topologically unobservable; Supply/Return is ~0.01-0.05C, below PT100 tolerance. A high row-level score is an autocorrelation artifact, NOT physical localisation.",
+  "detection_rationale": "Why leak/no-leak is a physics gate, NOT the tree: (1) each leak location is exactly one contiguous drain event, so the tree splits on that event's absolute operating-point fingerprint (temporal leakage), not the causal leak signal; (2) on a held-out event (leave-one-event-out / Regime B) the tree constant-predicts the largest leak class, so tree-based detection collapses and exact-location recall is 0 — a high row-level (Regime A) score is an autocorrelation artifact; (3) a genuine leak is causal and condition-invariant — escaping coolant drops level_corrected in a sustained way — which the gate detects and which generalises (LOEO detection ~88%) regardless of the day's heat load; (4) the heat-load confound (thermal expansion / thermal-lag residual drops) is rejected by the gate's temperature-transient guard, encoded as physics rather than learned splits. The tree is kept only as an advisory location hint.",
+  "split": {
+    "n_total": 9253,
+    "n_train": 6473,
+    "n_val": 1848,
+    "n_test": 932,
+    "n_events": 10,
+    "stratified": true
+  },
+  "per_class": {
+    "labels": [
+      "No leak",
+      "HBL LWU Return",
+      "MBL Antenna Return",
+      "MBL Antenna Supply",
+      "Spk Antenna Return",
+      "Spk Antenna Supply",
+      "Spk LWU Return",
+      "Spk LWU Supply",
+      "Spk Window Return",
+      "Spk Window Supply"
+    ],
+    "test_acc": [
+      1.0,
+      0.9666666666666667,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.9333333333333333,
+      0.875,
+      0.75,
+      1.0
+    ],
+    "test_count": [
+      828,
+      30,
+      7,
+      6,
+      7,
+      11,
+      15,
+      8,
+      12,
+      8
+    ],
+    "train_count": [
+      5793,
+      206,
+      42,
+      35,
+      42,
+      71,
+      102,
+      53,
+      78,
+      51
+    ]
+  },
+  "detection": {
+    "method": "sustained_level_drop_gate",
+    "_comment": "Deployed leak DETECTION is gated on a sustained drop of level_corrected, NOT on the tree class (which fingerprints one-off drain events). Calibrated from the dataset no-leak history.",
+    "slope_trip_mm_s": -0.015,
+    "cum_drop_trip_mm": -12.0,
+    "cum_window_s": 900.0,
+    "tt102_slope_trip_c_s": 0.01,
+    "debounce_scans": 3,
+    "calibration": {
+      "no_leak_slope_sigma_mm_s": 0.0019,
+      "no_leak_worst_slope_mm_s": -0.0168,
+      "smallest_leak_class": "HBL LWU Return",
+      "smallest_leak_median_slope_mm_s": -0.028,
+      "no_leak_worst_15min_drop_mm": -5.0,
+      "smallest_leak_15min_drop_mm": -25.0
+    }
+  }
+}

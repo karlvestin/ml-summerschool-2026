@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Leak Prediction</name>
+  <macros>
+    <P>CWM-CWS02:WtrC-</P>
+  </macros>
+  <width>650</width>
+  <height>820</height>
+  <background_color>
+    <color name="Interface Background" red="220" green="225" blue="221">
+    </color>
+  </background_color>
+  <widget type="rectangle" version="2.0.0">
+    <name>Titlebar</name>
+    <class>TITLE-BAR</class>
+    <x use_class="true">0</x>
+    <y use_class="true">0</y>
+    <width>650</width>
+    <height use_class="true">50</height>
+    <line_width use_class="true">0</line_width>
+    <background_color use_class="true">
+      <color name="Standard_Title_Bar" red="151" green="188" blue="202">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Title</name>
+    <class>_ESS Class Title</class>
+    <text>Cooling Skid — Leak Location Prediction</text>
+    <x use_class="true">20</x>
+    <y use_class="true">0</y>
+    <width>630</width>
+    <height use_class="true">50</height>
+    <font use_class="true">
+      <font name="_ESS Title" family="Source Sans Pro" style="BOLD_ITALIC" size="36.0">
+      </font>
+    </font>
+    <foreground_color use_class="true">
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <transparent use_class="true">true</transparent>
+    <horizontal_alignment use_class="true">0</horizontal_alignment>
+    <vertical_alignment use_class="true">1</vertical_alignment>
+    <wrap_words use_class="true">false</wrap_words>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>Stats BG</name>
+    <x>20</x>
+    <y>60</y>
+    <width>610</width>
+    <height>750</height>
+    <line_width>0</line_width>
+    <background_color>
+      <color red="200" green="205" blue="201">
+      </color>
+    </background_color>
+    <corner_width>10</corner_width>
+    <corner_height>10</corner_height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Stats Header</name>
+    <text>Model Performance</text>
+    <x>20</x>
+    <y>68</y>
+    <width>440</width>
+    <height>40</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="21.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Reload</name>
+    <actions>
+      <action type="write_pv">
+        <description>Re-read meta JSON</description>
+        <pv_name>$(P)Stats:Reload</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <text>Reload stats</text>
+    <x>460</x>
+    <y>70</y>
+    <width>150</width>
+    <height>34</height>
+    <tooltip>Re-read leak_model_meta.json into the Stats PVs</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>lbl_testacc</name>
+    <text>Test Accuracy (row-level, optimistic)</text>
+    <x>40</x>
+    <y>118</y>
+    <width>420</width>
+    <height>30</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>out_testacc</name>
+    <pv_name>$(P)Stats:TestAcc</pv_name>
+    <x>40</x>
+    <y>148</y>
+    <width>240</width>
+    <height>64</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="36.0">
+      </font>
+    </font>
+    <precision>2</precision>
+    <vertical_alignment>1</vertical_alignment>
+    <rules>
+      <rule name="target_bg" prop_id="background_color" out_exp="false">
+        <exp bool_exp="pv0==1">
+          <value>
+            <color red="200" green="235" blue="205">
+            </color>
+          </value>
+        </exp>
+        <exp bool_exp="pv0!=1">
+          <value>
+            <color red="240" green="200" blue="200">
+            </color>
+          </value>
+        </exp>
+        <pv_name>$(P)Stats:LevelGate</pv_name>
+      </rule>
+    </rules>
+    <tooltip>Background reflects the Level-dominance physics gate (Stats:LevelGate) — a check that the model relies on level dynamics, not this accuracy value itself.</tooltip>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>led_target</name>
+    <pv_name>$(P)Stats:LevelGate</pv_name>
+    <x>300</x>
+    <y>158</y>
+    <width>44</width>
+    <height>44</height>
+    <off_color>
+      <color red="200" green="40" blue="40">
+      </color>
+    </off_color>
+    <on_color>
+      <color red="40" green="180" blue="60">
+      </color>
+    </on_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>lbl_target</name>
+    <text>Level-dominance gate (FAIL/PASS)</text>
+    <x>352</x>
+    <y>158</y>
+    <width>250</width>
+    <height>44</height>
+    <vertical_alignment>1</vertical_alignment>
+    <tooltip>Physics gate, not an accuracy target: verifies vessel-level dynamics (LI-103) dominate the model's feature importance (verification_gates.level_importance/level_pass in leak_model_meta.json), rather than the model latching onto a spurious correlate. See Stats:LevelGate.</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>lbl_balacc</name>
+    <text>Balanced Acc (row-level, optimistic)</text>
+    <x>40</x>
+    <y>214</y>
+    <width>320</width>
+    <height>30</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>out_balacc</name>
+    <pv_name>$(P)Stats:TestBalAcc</pv_name>
+    <x>300</x>
+    <y>214</y>
+    <width>150</width>
+    <height>30</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>h_split</name>
+    <text>Split</text>
+    <x>40</x>
+    <y>258</y>
+    <width>120</width>
+    <height>28</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>h_acc</name>
+    <text>Accuracy (%)</text>
+    <x>200</x>
+    <y>258</y>
+    <width>180</width>
+    <height>28</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>h_mse</name>
+    <text>Macro-F1 (%)</text>
+    <x>410</x>
+    <y>258</y>
+    <width>180</width>
+    <height>28</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>r_train</name>
+    <text>Train</text>
+    <x>40</x>
+    <y>290</y>
+    <width>120</width>
+    <height>30</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>train_acc</name>
+    <pv_name>$(P)Stats:TrainAcc</pv_name>
+    <x>200</x>
+    <y>290</y>
+    <width>180</width>
+    <height>30</height>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>train_f1</name>
+    <pv_name>$(P)Stats:TrainF1</pv_name>
+    <x>410</x>
+    <y>290</y>
+    <width>180</width>
+    <height>30</height>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>r_val</name>
+    <text>Validation</text>
+    <x>40</x>
+    <y>324</y>
+    <width>140</width>
+    <height>30</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>val_acc</name>
+    <pv_name>$(P)Stats:ValAcc</pv_name>
+    <x>200</x>
+    <y>324</y>
+    <width>180</width>
+    <height>30</height>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>val_f1</name>
+    <pv_name>$(P)Stats:ValF1</pv_name>
+    <x>410</x>
+    <y>324</y>
+    <width>180</width>
+    <height>30</height>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>r_test</name>
+    <text>Test</text>
+    <x>40</x>
+    <y>358</y>
+    <width>120</width>
+    <height>30</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>test_acc2</name>
+    <pv_name>$(P)Stats:TestAcc</pv_name>
+    <x>200</x>
+    <y>358</y>
+    <width>180</width>
+    <height>30</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>test_f1</name>
+    <pv_name>$(P)Stats:TestF1</pv_name>
+    <x>410</x>
+    <y>358</y>
+    <width>180</width>
+    <height>30</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_loeo_hdr</name>
+    <text>LOEO (honest verdict) — leave-one-event-out CV</text>
+    <x>40</x>
+    <y>394</y>
+    <width>560</width>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="12.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="150" green="30" blue="30">
+      </color>
+    </foreground_color>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_loeo_detect</name>
+    <text>Detect recall</text>
+    <x>40</x>
+    <y>416</y>
+    <width>170</width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_loeo_detect</name>
+    <pv_name>$(P)Stats:LOEODetect</pv_name>
+    <x>40</x>
+    <y>436</y>
+    <width>170</width>
+    <height>32</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="20.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="150" green="30" blue="30">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="245" green="225" blue="225">
+      </color>
+    </background_color>
+    <precision>1</precision>
+    <vertical_alignment>1</vertical_alignment>
+    <tooltip>Leave-one-event-out recall for leak vs no-leak — the real generalisation number behind the trustworthy LeakDetected output.</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_loeo_side</name>
+    <text>Supply/Return acc (≈chance)</text>
+    <x>220</x>
+    <y>416</y>
+    <width>180</width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_loeo_side</name>
+    <pv_name>$(P)Stats:LOEOSide</pv_name>
+    <x>220</x>
+    <y>436</y>
+    <width>180</width>
+    <height>32</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="20.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="150" green="30" blue="30">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="245" green="225" blue="225">
+      </color>
+    </background_color>
+    <precision>1</precision>
+    <vertical_alignment>1</vertical_alignment>
+    <tooltip>Supply-vs-Return side accuracy under LOEO. ~50% is near chance — the physical delta (~0.01-0.05 degC) is below PT100 tolerance, so this barely generalises.</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_loeo_exact</name>
+    <text>Exact-location recall</text>
+    <x>410</x>
+    <y>416</y>
+    <width>180</width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_loeo_exact</name>
+    <pv_name>$(P)Stats:LOEOExact</pv_name>
+    <x>410</x>
+    <y>436</y>
+    <width>180</width>
+    <height>32</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="20.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="150" green="30" blue="30">
+      </color>
+    </foreground_color>
+    <background_color>
+      <color red="245" green="225" blue="225">
+      </color>
+    </background_color>
+    <precision>1</precision>
+    <vertical_alignment>1</vertical_alignment>
+    <tooltip>0% by construction: each leak location is a single drain event, held out whole in LOEO — an instrumentation/observability gap (see P&amp;ID M02430), not a modelling failure.</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_samples</name>
+    <text>Samples — train / val / test</text>
+    <x>40</x>
+    <y>482</y>
+    <width>260</width>
+    <height>28</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_ntrain</name>
+    <pv_name>$(P)Stats:NTrain</pv_name>
+    <x>300</x>
+    <y>482</y>
+    <width>90</width>
+    <height>28</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_nval</name>
+    <pv_name>$(P)Stats:NVal</pv_name>
+    <x>400</x>
+    <y>482</y>
+    <width>90</width>
+    <height>28</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_ntest</name>
+    <pv_name>$(P)Stats:NTest</pv_name>
+    <x>500</x>
+    <y>482</y>
+    <width>90</width>
+    <height>28</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_hp</name>
+    <text>Tree — depth / leaf / classes / events</text>
+    <x>40</x>
+    <y>516</y>
+    <width>250</width>
+    <height>28</height>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_depth</name>
+    <pv_name>$(P)Stats:MaxDepth</pv_name>
+    <x>300</x>
+    <y>516</y>
+    <width>55</width>
+    <height>28</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_leaf</name>
+    <pv_name>$(P)Stats:MinLeaf</pv_name>
+    <x>360</x>
+    <y>516</y>
+    <width>55</width>
+    <height>28</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_nclass</name>
+    <pv_name>$(P)Stats:NClasses</pv_name>
+    <x>420</x>
+    <y>516</y>
+    <width>55</width>
+    <height>28</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>v_nevents</name>
+    <pv_name>$(P)Stats:NEvents</pv_name>
+    <x>480</x>
+    <y>516</y>
+    <width>90</width>
+    <height>28</height>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <tooltip>Distinct drain events (=10, one per location incl. no-leak baseline) — why LOEO exact-location recall is 0 by construction.</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>l_perclass</name>
+    <text>Per-class test accuracy (row-level, optimistic)</text>
+    <x>40</x>
+    <y>554</y>
+    <width>460</width>
+    <height>28</height>
+    <font>
+      <font family="Source Sans Pro" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="xyplot" version="3.0.0">
+    <name>perclass_plot</name>
+    <x>40</x>
+    <y>584</y>
+    <width>560</width>
+    <height>216</height>
+    <background_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </background_color>
+    <tooltip>X = array index into Stats:ClassTestAcc / Stats:ClassLabel. Stats:ClassLabel is now a string waveform of location names — Phoebus xyplot has no native string-category axis, so this trace uses the implicit sample index (0-9); cross-reference Stats:ClassLabel for the name at each index.</tooltip>
+    <x_axis>
+      <title>leak location index (0-9; see Stats:ClassLabel)</title>
+      <autoscale>true</autoscale>
+      <log_scale>false</log_scale>
+      <minimum>0.0</minimum>
+      <maximum>100.0</maximum>
+      <show_grid>false</show_grid>
+      <title_font>
+        <font name="Default Bold" family="Source Sans Pro" style="BOLD" size="16.0">
+        </font>
+      </title_font>
+      <scale_font>
+        <font name="Default" family="Source Sans Pro" style="REGULAR" size="16.0">
+        </font>
+      </scale_font>
+      <visible>true</visible>
+    </x_axis>
+    <y_axes>
+      <y_axis>
+        <title>accuracy %</title>
+        <autoscale>false</autoscale>
+        <log_scale>false</log_scale>
+        <minimum>0.0</minimum>
+        <maximum>105.0</maximum>
+        <show_grid>false</show_grid>
+        <title_font>
+          <font name="Default Bold" family="Source Sans Pro" style="BOLD" size="16.0">
+          </font>
+        </title_font>
+        <scale_font>
+          <font name="Default" family="Source Sans Pro" style="REGULAR" size="16.0">
+          </font>
+        </scale_font>
+        <on_right>false</on_right>
+        <visible>true</visible>
+        <color>
+          <color name="Text" red="25" green="25" blue="25">
+          </color>
+        </color>
+      </y_axis>
+    </y_axes>
+    <traces>
+      <trace>
+        <name>per-class acc</name>
+        <x_pv></x_pv>
+        <y_pv>$(P)Stats:ClassTestAcc</y_pv>
+        <err_pv></err_pv>
+        <axis>0</axis>
+        <trace_type>2</trace_type>
+        <color>
+          <color red="0" green="0" blue="255">
+          </color>
+        </color>
+        <line_width>1</line_width>
+        <line_style>0</line_style>
+        <point_type>7</point_type>
+        <point_size>12</point_size>
+        <visible>true</visible>
+      </trace>
+    </traces>
+  </widget>
+</display>

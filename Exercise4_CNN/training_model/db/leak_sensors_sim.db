@@ -1,0 +1,86 @@
+# ============================================================================
+#  leak_sensors_sim.db — simulated sensor sources + switchable model-input routing
+#
+#  This IOC hosts BOTH sensor streams at once, as DISTINCT PVs:
+#    * SIMULATED stream — the five $(P)<tag>:SimRaw records below, written by
+#      training_sim.py (which adds any noise before writing). They never collide
+#      with the plant, so they live locally.
+#    * LIVE stream — the real skid PVs $(P)<tag>:MeasValue / :Speed. These are
+#      NOT defined here; with no local record, the routing links below resolve
+#      them on the ESS read-only gateway (see st.cmd's EPICS_CA_ADDR_LIST).
+#
+#  The model reads ONE switchable input per sensor — the $(P)<tag>:ModelIn ai
+#  records — which follow the $(P)Sim:Enable bo (leak_train.db):
+#      Sim:Enable = Simulated (On)  -> ModelIn = the :SimRaw replay  (bench)
+#      Sim:Enable = Live PVs  (Off) -> ModelIn = the live gateway    (monitoring)
+#  So the sim path is simply:  training_sim.py -> :SimRaw -> :ModelIn -> the aSub.
+#  leak_predict.db points the aSub's INPA..INPD at these ModelIn records.
+#
+#  Usage:  dbLoadRecords("leak_sensors_sim.db", "P=CWM-CWS02:WtrC-")
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+#  1. Raw simulation sources (written by training_sim.py via caput). PINI=YES so
+#     they hold a sane default at boot before the replayer connects. PT-101 is NOT
+#     a model input (dropped as a feature) but training_sim.py still drives it.
+# ----------------------------------------------------------------------------
+record(ao, "$(P)PT-101:SimRaw") { field(DTYP,"Soft Channel") field(DESC,"sim raw inlet pressure") field(EGU,"barg") field(PREC,"3") field(VAL,"0.55") field(PINI,"YES") }
+record(ao, "$(P)TT-102:SimRaw") { field(DTYP,"Soft Channel") field(DESC,"sim raw return temp")     field(EGU,"degC") field(PREC,"2") field(VAL,"26.0") field(PINI,"YES") }
+record(ao, "$(P)TT-110:SimRaw") { field(DTYP,"Soft Channel") field(DESC,"sim raw supply temp")     field(EGU,"degC") field(PREC,"2") field(VAL,"25.5") field(PINI,"YES") }
+record(ao, "$(P)LI-103:SimRaw") { field(DTYP,"Soft Channel") field(DESC,"sim raw vessel level")    field(EGU,"mm")   field(PREC,"1") field(VAL,"400.0") field(PINI,"YES") }
+record(ao, "$(P)P-101:SimRaw")  { field(DTYP,"Soft Channel") field(DESC,"sim raw pump speed")      field(EGU,"%")    field(PREC,"2") field(VAL,"92.0") field(PINI,"YES") }
+
+# ----------------------------------------------------------------------------
+#  2. Switchable model-input routing (the 4 model sensors only; PT-101 excluded).
+#
+#  Each ModelIn ai selects its source via EPICS simulation mode, driven by the
+#  $(P)Sim:Enable bo:
+#    INP  = the LIVE gateway PV, used when Sim:Enable = Live PVs (Off). CP keeps
+#           it fresh; MS folds a disconnected/INVALID skid sensor into the
+#           prediction instead of feeding the model a stale value.
+#    SIML = $(P)Sim:Enable : Simulated (On) -> SIMM=YES -> read SIOL, not INP.
+#    SIOL = the :SimRaw replay source, used when Sim:Enable = Simulated (On). CP so
+#           the model input follows every replayed sample.
+#    SIMS = NO_ALARM : a simulated value is not an instrument fault.
+#  The aSub (leak_predict.db) reads INPA..INPD from these ModelIn records.
+# ----------------------------------------------------------------------------
+record(ai, "$(P)TT-102:ModelIn") {
+    field(DESC, "TT-102 to model (sim/live)")
+    field(DTYP, "Soft Channel")
+    field(EGU,  "degC")
+    field(PREC, "2")
+    field(INP,  "$(P)TT-102:MeasValue CP MS")
+    field(SIML, "$(P)Sim:Enable")
+    field(SIOL, "$(P)TT-102:SimRaw CP")
+    field(SIMS, "NO_ALARM")
+}
+record(ai, "$(P)TT-110:ModelIn") {
+    field(DESC, "TT-110 to model (sim/live)")
+    field(DTYP, "Soft Channel")
+    field(EGU,  "degC")
+    field(PREC, "2")
+    field(INP,  "$(P)TT-110:MeasValue CP MS")
+    field(SIML, "$(P)Sim:Enable")
+    field(SIOL, "$(P)TT-110:SimRaw CP")
+    field(SIMS, "NO_ALARM")
+}
+record(ai, "$(P)LI-103:ModelIn") {
+    field(DESC, "LI-103 to model (sim/live)")
+    field(DTYP, "Soft Channel")
+    field(EGU,  "mm")
+    field(PREC, "1")
+    field(INP,  "$(P)LI-103:MeasValue CP MS")
+    field(SIML, "$(P)Sim:Enable")
+    field(SIOL, "$(P)LI-103:SimRaw CP")
+    field(SIMS, "NO_ALARM")
+}
+record(ai, "$(P)P-101:ModelIn") {
+    field(DESC, "P-101 speed to model (sim/live)")
+    field(DTYP, "Soft Channel")
+    field(EGU,  "%")
+    field(PREC, "2")
+    field(INP,  "$(P)P-101:Speed CP MS")
+    field(SIML, "$(P)Sim:Enable")
+    field(SIOL, "$(P)P-101:SimRaw CP")
+    field(SIMS, "NO_ALARM")
+}

@@ -1,0 +1,197 @@
+# ============================================================================
+#  leak_train.db — STUDENT TRAINING bench for the cooling-skid leak model
+#                  (LEAK-LOCATION CLASSIFICATION version)
+#
+#  This database turns the production leak-prediction IOC into an interactive
+#  teaching bench. It is loaded ALONGSIDE the module's leak_predict.db (the
+#  leakPredict aSub + the Status/LeakDetected/ClassIdx/Confidence readbacks) and
+#  leak_sensors_sim.db (the :SimRaw sim sources + the sim/live ModelIn routing).
+#  This file adds the controls (incl. the $(P)Sim:Enable switch), the scoreboard,
+#  and the model-statistics PVs.
+#
+#  The ML task is a 10-class leak-LOCATION classification (not rate regression),
+#  so this bench scores by CLASS MATCH, not error/RMSE:
+#    1. SENSOR SIMULATION:  the $(P)Sim:Enable switch (below) routes the model to
+#       the replayed :SimRaw sources (leak_sensors_sim.db); training_sim.py replays
+#       real Dataset.xls rows into them.
+#    2. GROUND-TRUTH COMPARISON:  $(P)Sim:TrueClass / $(P)Sim:TrueLocation carry
+#       the true location of the replayed row; the model's guess is
+#       $(P)LeakML:Status / $(P)LeakML:ClassIdx (from leak_predict.db). The bench
+#       tracks EXACT-location match and (the trustworthy axis) DETECTION match.
+#    3. MODEL STATISTICS:  $(P)Stats:* hold the trained model's performance —
+#       accuracy / balanced-accuracy / macro-F1, the HONEST leave-one-event-out
+#       numbers, per-class accuracy, hyper-params and split sizes. training_sim.py
+#       loads these from leak_model_meta.json on start and on $(P)Stats:Reload.
+#
+#  Macro:  P  — PV prefix, default "CWM-CWS02:WtrC-"
+#
+#  Usage:  dbLoadRecords("leak_train.db", "P=CWM-CWS02:WtrC-")
+#
+# ----------------------------------------------------------------------------
+# MASTER SWITCH: "should the skid sensors show made-up data instead of real
+# hardware?" A binary output (bo) is a 0/1 toggle the student clicks on the OPI.
+record(bo, "$(P)Sim:Enable") {
+    field(DESC, "Put sensors in simulation mode")   # tooltip text for this switch
+    field(ZNAM, "Live PVs")                          # label shown when value = 0 (real hardware)
+    field(ONAM, "Simulated")                         # label shown when value = 1 (fake replayed data)
+    field(VAL,  "1")                                 # start value = 1, i.e. simulation ON by default
+    field(PINI, "YES")                               # apply that start value at IOC startup
+}
+# PLAY / PAUSE: another 0/1 toggle. 1 = stream rows, 0 = hold. training_sim.py
+# watches this PV and starts or stops feeding data accordingly.
+record(bo, "$(P)Sim:Run") {
+    field(DESC, "Start/stop the data stream")        # tooltip text
+    field(ZNAM, "Stopped")                           # label when value = 0 (paused)
+    field(ONAM, "Running")                           # label when value = 1 (streaming)
+    field(VAL,  "0")                                 # start value = 0, i.e. paused until the student presses play
+    field(PINI, "YES")                               # apply that start value at startup
+}
+# ROW ORDER KNOB: within one leak location, do we replay its rows in the order
+# they were recorded, or shuffled? mbbo = a knob with named positions.
+record(mbbo, "$(P)Sim:Mode") {
+    field(DESC, "Row order within the replayed class")  # tooltip text
+    field(ZRVL, "0") field(ZRST, "Replay sequential")   # position 0: rows in original time order
+    field(ONVL, "1") field(ONST, "Replay shuffled")     # position 1: rows in random order
+    field(VAL,  "0")                                    # start on position 0 (sequential)
+    field(PINI, "YES")                                  # apply that start value at startup
+}
+# Which class to replay. State index == model class index (see leak_model_meta.json
+# class_to_label). training_sim.py replays real rows of this location.
+# SCENARIO KNOB: picks which of the 10 situations to feed the model. Each knob
+# position's number IS the model's class index (0..9), so the "true answer" is
+# whatever position the student has selected here.
+record(mbbo, "$(P)Sim:Scenario") {
+    field(DESC, "Location scenario to replay")           # tooltip text
+    field(ZRVL, "0")  field(ZRST, "[0] No leak")             # position 0 = healthy skid, no leak
+    field(ONVL, "1")  field(ONST, "[1] HBL LWU Return")      # position 1 = leak at this drain point
+    field(TWVL, "2")  field(TWST, "[2] MBL Antenna Return")  # position 2 = leak here
+    field(THVL, "3")  field(THST, "[3] MBL Antenna Supply")  # position 3 = leak here
+    field(FRVL, "4")  field(FRST, "[4] Spk Antenna Return")  # position 4 = leak here
+    field(FVVL, "5")  field(FVST, "[5] Spk Antenna Supply")  # position 5 = leak here
+    field(SXVL, "6")  field(SXST, "[6] Spk LWU Return")      # position 6 = leak here
+    field(SVVL, "7")  field(SVST, "[7] Spk LWU Supply")      # position 7 = leak here
+    field(EIVL, "8")  field(EIST, "[8] Spk Window Return")   # position 8 = leak here
+    field(NIVL, "9")  field(NIST, "[9] Spk Window Supply")   # position 9 = leak here
+    field(VAL,  "0")                                     # start on position 0 (No leak)
+    field(PINI, "YES")                                   # apply that start value at startup
+}
+# Measurement-noise scale (0 = clean, 1 = one per-class std-dev of jitter).
+# NOISE DIAL: how much random jitter to add to the replayed sensor values, to
+# test whether the model is robust. ao = analog output, a numeric dial.
+record(ao, "$(P)Sim:Noise") {
+    field(DESC, "Sensor noise scale")                # tooltip text
+    field(PREC, "2")                                 # show 2 digits after the decimal point on the OPI
+    field(DRVL, "0.0") field(DRVH, "2.0")            # drive limits: the student can't set below 0.0 or above 2.0
+    field(LOPR, "0.0") field(HOPR, "2.0")            # display range for gauges/sliders: 0.0 .. 2.0
+    field(VAL,  "0.3")                               # start value = 0.3 (a little realistic noise)
+    field(PINI, "YES")                               # apply that start value at startup
+}
+
+# ----------------------------------------------------------------------------
+#  3. Ground truth + live comparison against the model output.
+#     training_sim.py writes $(P)Sim:TrueClass (index of the row it is streaming);
+#     $(P)Sim:TrueLocation decodes it to a string. The model's guess is
+#     $(P)LeakML:ClassIdx / $(P)LeakML:Status. The bench scores two axes:
+#       Match       = exact location correct (pred class == true class)
+#       DetectMatch = leak-vs-no-leak correct (the trustworthy axis)
+# ----------------------------------------------------------------------------
+# THE CORRECT ANSWER (as a number). The Python
+# replayer writes the class index of whatever row it is currently streaming here,
+# so the bench always knows the ground truth to compare the model against.
+record(longin, "$(P)Sim:TrueClass") {
+    field(DESC, "TRUE class index being simulated")  # tooltip text
+    field(DTYP, "Soft Channel")                      # plain in-memory value written by software
+}
+# Decode the true class index to a location string (mirrors LeakML:Status).
+# THE CORRECT ANSWER (as words). mbbi = a multi-state lamp. Its input link reads
+# the number above and lights up the matching location name — so a human reads a
+# location, not a bare index. These 10 strings MUST match the model's labels
+# exactly (the "label sync invariant" in CLAUDE.md).
+record(mbbi, "$(P)Sim:TrueLocation") {
+    field(DESC, "TRUE leak location being simulated") # tooltip text
+    field(INP,  "$(P)Sim:TrueClass CP")               # read from Sim:TrueClass; "CP" = re-run whenever it changes
+    field(NOBT, "4")                                  # 4 bits can encode 0..15, enough for our 10 states
+    field(ZRVL, "0")  field(ZRST, "No leak")             # index 0 shows this text
+    field(ONVL, "1")  field(ONST, "HBL LWU Return")      # index 1 shows this text
+    field(TWVL, "2")  field(TWST, "MBL Antenna Return")  # index 2 shows this text
+    field(THVL, "3")  field(THST, "MBL Antenna Supply")  # index 3 shows this text
+    field(FRVL, "4")  field(FRST, "Spk Antenna Return")  # index 4 shows this text
+    field(FVVL, "5")  field(FVST, "Spk Antenna Supply")  # index 5 shows this text
+    field(SXVL, "6")  field(SXST, "Spk LWU Return")      # index 6 shows this text
+    field(SVVL, "7")  field(SVST, "Spk LWU Supply")      # index 7 shows this text
+    field(EIVL, "8")  field(EIST, "Spk Window Return")   # index 8 shows this text
+    field(NIVL, "9")  field(NIST, "Spk Window Supply")   # index 9 shows this text
+}
+# Running scoreboard, maintained by the Python service.
+# EXACT-LOCATION HIT/MISS lamp for the most recent sample: did the model name the
+# right one of 10 locations? (This is the HARD, optimistic axis — see the caveat.)
+record(bi,     "$(P)Sim:Match")       { field(DTYP,"Soft Channel") field(DESC,"last sample: exact location correct?")
+    field(ZNAM,"Miss") field(ONAM,"Hit") field(OSV,"NO_ALARM") }   # 0="Miss", 1="Hit"; a Hit raises no alarm
+# LEAK-vs-NO-LEAK correct? lamp for the most recent sample. This is the axis we
+# actually trust (detection generalises; exact location does not).
+record(bi,     "$(P)Sim:DetectMatch") { field(DTYP,"Soft Channel") field(DESC,"last sample: leak/no-leak correct?")
+    field(ZNAM,"Wrong") field(ONAM,"Correct") field(ZSV,"MINOR") } # 0="Wrong" (MINOR alarm), 1="Correct"
+# SESSION SCORE, exact-location: percentage of samples the model located exactly.
+# ai = numeric gauge; EGU "%" and PREC 1 give a "xx.x %" readout.
+record(ai,     "$(P)Sim:RunAcc")      { field(DTYP,"Soft Channel") field(DESC,"session exact-location match %") field(EGU,"%") field(PREC,"1") }
+# SESSION SCORE, detection: percentage of samples the model got leak/no-leak right.
+record(ai,     "$(P)Sim:RunDetectAcc"){ field(DTYP,"Soft Channel") field(DESC,"session detection %")           field(EGU,"%") field(PREC,"1") }
+# How many samples have been scored so far this session (an integer counter).
+record(longin, "$(P)Sim:NSamples")    { field(DTYP,"Soft Channel") field(DESC,"samples this session") }
+# RESET BUTTON: student presses it to zero the scoreboard and start a fresh count.
+record(bo,     "$(P)Sim:Reset")       { field(DESC,"Zero the session scoreboard")
+    field(ZNAM,"Idle") field(ONAM,"Reset") }                        # 0="Idle" (nothing), 1="Reset" (clear counters)
+
+# ----------------------------------------------------------------------------
+#  4. Model statistics (loaded from leak_model_meta.json by training_sim.py).
+#     Row-level (optimistic) accuracy/F1 PLUS the honest leave-one-event-out
+#     block — the OPI must show BOTH so students see the observability gap.
+# ----------------------------------------------------------------------------
+# RELOAD BUTTON: re-reads leak_model_meta.json and refreshes all the Stats:* PVs
+# below, so the numbers update after the model is retrained without restarting.
+record(bo, "$(P)Stats:Reload") {
+    field(DESC, "Re-read meta JSON into stats PVs")  # tooltip text
+    field(ZNAM, "Idle") field(ONAM, "Reload")        # 0="Idle", 1="Reload" (trigger a re-read)
+}
+# Row-level (optimistic) — inflated by within-event autocorrelation.
+# ---- The OPTIMISTIC scores. These come from a random row-by-row split. Because
+#      neighbouring rows of one leak event look almost identical, the model can
+#      "memorise" an event and these numbers look flattering. Read them with the
+#      honest LOEO block further down. All are gauges reading a percentage. ----
+record(ai, "$(P)Stats:TestAcc")    { field(DTYP,"Soft Channel") field(DESC,"test accuracy (row-level)")  field(EGU,"%") field(PREC,"2") }   # accuracy on the held-out TEST rows
+record(ai, "$(P)Stats:TestBalAcc") { field(DTYP,"Soft Channel") field(DESC,"test balanced accuracy")     field(EGU,"%") field(PREC,"2") }   # accuracy averaged evenly over classes (fair to rare leaks)
+record(ai, "$(P)Stats:ValAcc")     { field(DTYP,"Soft Channel") field(DESC,"val accuracy (row-level)")   field(EGU,"%") field(PREC,"2") }   # accuracy on the VALIDATION rows (used while tuning)
+record(ai, "$(P)Stats:TrainAcc")   { field(DTYP,"Soft Channel") field(DESC,"train accuracy (row-level)") field(EGU,"%") field(PREC,"2") }   # accuracy on the TRAINING rows (memorised, so highest)
+record(ai, "$(P)Stats:TestF1")     { field(DTYP,"Soft Channel") field(DESC,"test macro-F1 (row-level)")  field(EGU,"%") field(PREC,"2") }   # macro-F1 on test: balances false alarms vs misses per class
+record(ai, "$(P)Stats:ValF1")      { field(DTYP,"Soft Channel") field(DESC,"val macro-F1 (row-level)")   field(EGU,"%") field(PREC,"2") }   # macro-F1 on validation rows
+record(ai, "$(P)Stats:TrainF1")    { field(DTYP,"Soft Channel") field(DESC,"train macro-F1 (row-level)") field(EGU,"%") field(PREC,"2") }   # macro-F1 on training rows
+# HONEST leave-one-event-out — the trustworthy verdict.
+# ---- The HONEST scores (LOEO = Leave-One-Event-Out). Here a WHOLE leak event is
+#      hidden during training, so the model can't memorise it. This is the real
+#      test of generalisation, and it reveals the physics limit of the sensors. ----
+record(ai, "$(P)Stats:LOEODetect") { field(DTYP,"Soft Channel") field(DESC,"LOEO leak-detection recall") field(EGU,"%") field(PREC,"1") }   # can it still say "a leak happened"? (~88%, GOOD)
+record(ai, "$(P)Stats:LOEOSide")   { field(DTYP,"Soft Channel") field(DESC,"LOEO supply/return accuracy") field(EGU,"%") field(PREC,"1") }   # supply vs return side? (~50%, i.e. a coin flip)
+record(ai, "$(P)Stats:LOEOExact")  { field(DTYP,"Soft Channel") field(DESC,"LOEO exact-location recall")  field(EGU,"%") field(PREC,"1") }   # exact 1-of-10 location? (0% — physically unobservable)
+# Physics gate: did the level features carry the bulk of the signal?
+# SANITY LAMP: PASS means the water-LEVEL features dominated the model's decisions
+# (as physics demands for a leak), FAIL means the model leaned on the wrong signals.
+record(bi, "$(P)Stats:LevelGate")  { field(DTYP,"Soft Channel") field(DESC,"level-dominance gate")
+    field(ZNAM,"FAIL") field(ONAM,"PASS") field(ZSV,"MAJOR") }      # 0="FAIL" (MAJOR alarm), 1="PASS"
+
+# ---- Dataset & model shape counters (plain integers loaded from the meta JSON). ----
+record(longin, "$(P)Stats:NTotal")   { field(DTYP,"Soft Channel") field(DESC,"total samples") }                       # rows in the whole dataset
+record(longin, "$(P)Stats:NTrain")   { field(DTYP,"Soft Channel") field(DESC,"train samples") }                       # rows used to train
+record(longin, "$(P)Stats:NVal")     { field(DTYP,"Soft Channel") field(DESC,"val samples") }                         # rows used to validate/tune
+record(longin, "$(P)Stats:NTest")    { field(DTYP,"Soft Channel") field(DESC,"test samples") }                        # rows held back for the final test
+record(longin, "$(P)Stats:NClasses") { field(DTYP,"Soft Channel") field(DESC,"number of classes") }                   # how many leak locations + "No leak" (=10)
+record(longin, "$(P)Stats:NEvents")  { field(DTYP,"Soft Channel") field(DESC,"distinct drain events (1 per location)") } # each leak is exactly ONE contiguous event
+record(longin, "$(P)Stats:MaxDepth") { field(DTYP,"Soft Channel") field(DESC,"tree max depth") }                      # decision-tree hyper-parameter: how deep it may grow
+record(longin, "$(P)Stats:MinLeaf")  { field(DTYP,"Soft Channel") field(DESC,"min leaf size") }                       # decision-tree hyper-parameter: fewest rows allowed in a leaf
+
+# Per-class accuracy, for an OPI bar chart. Index aligns with class index.
+# ClassLabel is now a STRING waveform (location names, not numeric rates).
+# ---- ARRAYS (waveform) feed an OPI bar chart, one bar per class. NELM=16 is just
+#      headroom for our 10 classes; FTVL is the element type of the array. ----
+record(waveform, "$(P)Stats:ClassLabel")    { field(DTYP,"Soft Channel") field(DESC,"class location name") field(FTVL,"STRING") field(NELM,"16") }  # the 10 location names (text), one per bar
+record(waveform, "$(P)Stats:ClassTestAcc")  { field(DTYP,"Soft Channel") field(DESC,"per-class test acc")  field(FTVL,"DOUBLE") field(NELM,"16") field(EGU,"%") }  # each class's own test accuracy (%)
+record(waveform, "$(P)Stats:ClassTestCount"){ field(DTYP,"Soft Channel") field(DESC,"per-class test n")   field(FTVL,"DOUBLE") field(NELM,"16") }  # how many test rows each class had (bar reliability)
