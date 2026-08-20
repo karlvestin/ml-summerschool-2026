@@ -10,6 +10,36 @@ from epicsarchiver.retrieval.archiver_retrieval.processor import (
 )
 from p4p.client.thread import Context
 
+def fetch_history_from_csv(start_time):
+    start_time = pd.Timestamp(start_time)
+
+    begin_time = start_time - pd.Timedelta(days=2)
+    end_time = start_time
+
+    df = pd.read_csv("./may.csv")
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+    begin_time = start_time - pd.Timedelta(days=2)
+    end_time = start_time
+
+    df = df[
+        (df["timestamp"] >= begin_time)
+        & (df["timestamp"] < end_time)
+    ].copy()
+
+    if df.empty:
+        raise RuntimeError(
+            f"No data found between {begin_time} and {end_time}"
+        )
+
+    df = df[["item_id", "timestamp", "target"]]
+    df = df.sort_values(["item_id", "timestamp"])
+
+    return TimeSeriesDataFrame.from_data_frame(
+        df,
+        id_column="item_id",
+        timestamp_column="timestamp",
+    )
 def fetch_history_from_archiver(start_time):
     end_time = start_time
     begin_time = start_time - pd.Timedelta(days=14)
@@ -70,8 +100,9 @@ def write_results_to_epics(ctx, predictions):
 
 def run_forecast(start_time, predictor, ctx):
     print(f"Running forecast for start time: {start_time}")
-    print("Fetching 14 days of archived input data...")
-    history = fetch_history_from_archiver(start_time)
+    print("Fetching 2 days of archived input data...")
+    history = fetch_history_from_csv(start_time)
+    #history = fetch_history_from_archiver(start_time)
     print("Running 48 hour prediction...")
     predictions = predictor.predict(history)
     print("Writing forecast to EPICS...")
