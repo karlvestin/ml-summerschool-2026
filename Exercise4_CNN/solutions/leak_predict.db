@@ -4,21 +4,26 @@
 #  An aSub record samples the four skid sensor PVs, runs the mlpack DecisionTree
 #  in the leakPredict subroutine, and publishes:
 #     $(P)LeakML:Status        predicted leak location     (mbbi, 10 states)
-#     $(P)LeakML:LeakDetected  leak vs no-leak             (bi) <- TRUST THIS
 #     $(P)LeakML:Confidence    model confidence            (0..1)
 #     $(P)LeakML:ClassIdx      raw class index             (0..9)
 #
+#  STUDENT BONUS EXERCISE: the leak-DETECTION readbacks — $(P)LeakML:LeakDetected
+#  (bi), $(P)LeakML:LevelRate (ai) and $(P)LeakML:CumDrop5min (ai) — are NOT
+#  defined here. They surface the physics-gate outputs (VALC/VALD/VALE), which the
+#  aSub only produces once the gate itself is built. See docs/EXERCISE_leak_gate.md;
+#  reference: solutions/leak_predict.db.
+#
 #  HONESTY NOTE: exact leak LOCATION is not physically observable from these
 #  lumped skid sensors (all branches merge off-skid; see train_model.py's
-#  leave-one-event-out validation). Only LeakDetected generalises; the Status
-#  location is a best-guess and is alarmed MAJOR, while LeakDetected is MAJOR.
+#  leave-one-event-out validation). The Status location is a best-guess (advisory,
+#  alarmed MAJOR); the trustworthy leak/no-leak alarm is the LeakDetected bi (bonus).
 #
 #  Macro:
 #     P  PV prefix, default "CWM-CWS02:WtrC-"
 #
-#  The aSub reads the real skid sensor PVs by name. For a standalone test
-#  (no live plant), additionally load leak_predict_sim.db, which defines the
-#  skid sensor PVs as writable soft records the OPI can drive.
+#  The aSub reads four switchable routing records ($(P)<tag>:ModelIn, defined in
+#  leak_sensors_sim.db). Those follow the $(P)Sim:Enable bo: Simulated -> the
+#  replayed :SimRaw sources (bench), Live PVs -> the real skid PVs on the gateway.
 #
 #  Usage:  dbLoadRecords("leak_predict.db", "P=CWM-CWS02:WtrC-")
 # ============================================================================
@@ -26,36 +31,10 @@
 # ----------------------------------------------------------------------------
 #  Inference engine: 4 sensor inputs (A..D) -> 3 outputs (VALA..VALC).
 #  SCAN = 5 second. The d_correctedLev_dt slope is fit on real timestamps, so it
-#  stays mm/s regardless of cadence; the offline data was ~30 s-spaced. Input
-#  links are CA (read current value at scan time) so the cadence stays clean.
+#  stays mm/s regardless of cadence; the offline data was ~30 s-spaced.
 #  (PT-101 was dropped as a model input — it carried no leak signal.)
 # ----------------------------------------------------------------------------
-record(aSub, "$(P)LeakML:Predict") {
-    field(DESC, "mlpack leak-location inference")
-    field(SCAN, "5 second")
-    field(INAM, "leakPredictInit")
-    field(SNAM, "leakPredict")
 
-    # CA: read current value at scan time (keeps the cadence a clean 5 s).
-    # MS:  maximize severity — a disconnected/INVALID sensor (these are CA links
-    #      to the skid IOC in production) propagates INVALID into the prediction
-    #      instead of feeding the model a stale value and emitting confident garbage.
-    field(FTA,  "DOUBLE") field(INPA, "$(P)TT-102:MeasValue CP MS")
-    field(FTB,  "DOUBLE") field(INPB, "$(P)TT-110:MeasValue CP MS")
-    field(FTC,  "DOUBLE") field(INPC, "$(P)LI-103:MeasValue CP MS")
-    field(FTD,  "DOUBLE") field(INPD, "$(P)P-101:Speed CP MS")
-
-    field(FTVA, "DOUBLE") field(NOVA, "1")   # GATED class idx (0=No leak unless a leak is detected)
-    field(FTVB, "DOUBLE") field(NOVB, "1")   # advisory-location confidence (0..1)
-    field(FTVC, "DOUBLE") field(NOVC, "1")   # leak detected, physics gate (0=no leak, 1=leak)
-    field(FTVD, "DOUBLE") field(NOVD, "1")   # d(level_corrected)/dt (mm/s)
-    field(FTVE, "DOUBLE") field(NOVE, "1")   # cumulative 5-min level drop (mm)
-    field(FTVF, "DOUBLE") field(NOVF, "1")   # raw (ungated) tree location hint idx
-    field(FTVG, "DOUBLE") field(NOVG, "1")   # out-of-training-envelope flag (0/1)
-
-    # Latch the freshly-computed outputs into the operator readbacks every scan.
-    field(FLNK, "$(P)LeakML:FanOut")
-}
 
 # ----------------------------------------------------------------------------
 #  Fan the model result out to the readbacks. Each latches the current VAL*
@@ -64,37 +43,16 @@ record(aSub, "$(P)LeakML:Predict") {
 #  no-leak state, where the class index never changes and a bare CA monitor
 #  would never fire.
 # ----------------------------------------------------------------------------
-record(fanout, "$(P)LeakML:FanOut") {
-    field(DESC, "Latch model outputs to readbacks")
-    field(LNK1, "$(P)LeakML:ClassIdx")
-    field(LNK2, "$(P)LeakML:Confidence")
-    field(LNK3, "$(P)LeakML:LeakDetected")
-    field(LNK4, "$(P)LeakML:Status")
-    field(LNK5, "$(P)LeakML:LevelRate")
-    field(LNK6, "$(P)LeakML:CumDrop5min")
-    field(FLNK, "$(P)LeakML:FanOut2")
-}
-
-record(fanout, "$(P)LeakML:FanOut2") {
-    field(DESC, "Latch model diagnostics to readbacks")
-    field(LNK1, "$(P)LeakML:LocationHint")
-    field(LNK2, "$(P)LeakML:OutOfRange")
-}
 
 # ----------------------------------------------------------------------------
 #  Operator-facing readbacks (monitor the aSub outputs via CA).
 # ----------------------------------------------------------------------------
-record(ai, "$(P)LeakML:Confidence") {
-    field(DESC, "Model confidence")
-    field(INP,  "$(P)LeakML:Predict.VALB NPP")
-    field(EGU,  "")
-    field(PREC, "3")
-}
 
-record(longin, "$(P)LeakML:ClassIdx") {
-    field(DESC, "Predicted class index")
-    field(INP,  "$(P)LeakML:Predict.VALA NPP")
-}
+
+# STUDENT BONUS EXERCISE: the trustworthy leak/no-leak output — a bi on
+# $(P)LeakML:Predict.VALC (physics gate), alarmed MAJOR on the LEAK state — is
+# built as part of the detection exercise. See docs/EXERCISE_leak_gate.md;
+# reference: solutions/leak_predict.db.
 
 # Trustworthy output: leak vs no-leak (the only axis that generalises). MAJOR
 # alarm on the leak state — this is the real alarm, not the location below.
@@ -104,25 +62,12 @@ record(bi, "$(P)LeakML:LeakDetected") {
     field(ZNAM, "No Leak")   field(ZSV, "NO_ALARM")
     field(ONAM, "LEAK")      field(OSV, "MAJOR")
 }
+# ----------------------------------------------------------------------------
 
 # Best-guess leak location (class index -> <section> <component> <side>).
 # NOTE: location is NOT physically resolvable from these sensors — treat as
 # advisory only (alarmed MAJOR). The bi above carries the trustworthy alarm.
-record(mbbi, "$(P)LeakML:Status") {
-    field(DESC, "Leak location (advisory)")
-    field(INP,  "$(P)LeakML:Predict.VALA NPP")
-    field(NOBT, "4")
-    field(ZRVL, "0")  field(ZRST, "No leak")             field(ZRSV, "NO_ALARM")
-    field(ONVL, "1")  field(ONST, "HBL LWU Return")      field(ONSV, "MAJOR")
-    field(TWVL, "2")  field(TWST, "MBL Antenna Return")  field(TWSV, "MAJOR")
-    field(THVL, "3")  field(THST, "MBL Antenna Supply")  field(THSV, "MAJOR")
-    field(FRVL, "4")  field(FRST, "Spk Antenna Return")  field(FRSV, "MAJOR")
-    field(FVVL, "5")  field(FVST, "Spk Antenna Supply")  field(FVSV, "MAJOR")
-    field(SXVL, "6")  field(SXST, "Spk LWU Return")      field(SXSV, "MAJOR")
-    field(SVVL, "7")  field(SVST, "Spk LWU Supply")      field(SVSV, "MAJOR")
-    field(EIVL, "8")  field(EIST, "Spk Window Return")   field(EISV, "MAJOR")
-    field(NIVL, "9")  field(NIST, "Spk Window Supply")   field(NISV, "MAJOR")
-}
+
 
 # ----------------------------------------------------------------------------
 #  Detection diagnostics (drive the physics gate; the numbers to trust).
@@ -140,32 +85,13 @@ record(ai, "$(P)LeakML:CumDrop5min") {
     field(EGU,  "mm")
     field(PREC, "1")
 }
+# ----------------------------------------------------------------------------
 
 # Out-of-training-envelope flag: any live feature clamped at normalisation. The
 # advisory location is unreliable when this is set (extrapolated input).
-record(bi, "$(P)LeakML:OutOfRange") {
-    field(DESC, "Live inputs outside training envelope")
-    field(INP,  "$(P)LeakML:Predict.VALG NPP")
-    field(ZNAM, "In range")      field(ZSV, "NO_ALARM")
-    field(ONAM, "EXTRAPOLATED")  field(OSV, "MINOR")
-}
 
 # Raw (ungated) tree location guess. UNRELIABLE by construction (fingerprints
 # one-off drain events); shown for context only, NEVER alarmed. The gated
 # $(P)LeakML:Status is the operator-facing location, valid only when a leak is
 # actually detected.
-record(mbbi, "$(P)LeakML:LocationHint") {
-    field(DESC, "Advisory location hint (ungated)")
-    field(INP,  "$(P)LeakML:Predict.VALF NPP")
-    field(NOBT, "4")
-    field(ZRVL, "0")  field(ZRST, "No leak")
-    field(ONVL, "1")  field(ONST, "HBL LWU Return")
-    field(TWVL, "2")  field(TWST, "MBL Antenna Return")
-    field(THVL, "3")  field(THST, "MBL Antenna Supply")
-    field(FRVL, "4")  field(FRST, "Spk Antenna Return")
-    field(FVVL, "5")  field(FVST, "Spk Antenna Supply")
-    field(SXVL, "6")  field(SXST, "Spk LWU Return")
-    field(SVVL, "7")  field(SVST, "Spk LWU Supply")
-    field(EIVL, "8")  field(EIST, "Spk Window Return")
-    field(NIVL, "9")  field(NIST, "Spk Window Supply")
-}
+

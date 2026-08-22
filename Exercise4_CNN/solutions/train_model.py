@@ -226,10 +226,7 @@ n_events = int(event_id[-1]) + 1
 print(f"  {n_events} contiguous events (one per class — each leak location drained once)")
 
 # ─── Min-max normalisation ─────────────────────────────────────────────────────
-feat_min   = X.min(axis=0)
-feat_max   = X.max(axis=0)
-feat_range = np.where(feat_max - feat_min > 0, feat_max - feat_min, 1.0)
-X_norm     = np.asfortranarray((X - feat_min) / feat_range)
+## STUDENT INPUT
 
 # ─── Metrics helpers (imbalance-aware; 89.5% no-leak makes accuracy misleading) ─
 def confusion(y_true, y_pred, k):
@@ -251,15 +248,12 @@ def class_report(M):
     return recall, prec, f1, float(np.nanmean(recall[present])), float(np.mean(f1[present]))
 
 def fit_dt(Xtr, ytr):
-    return mlpack.decision_tree(
-        training=np.asfortranarray(Xtr), labels=ytr,
-        maximum_depth=DT_MAX_DEPTH, minimum_leaf_size=DT_MIN_LEAF,
-        minimum_gain_split=DT_MIN_GAIN)["output_model"]
+## STUDENT INPUT
+
 
 def dt_predict(m, X):
-    return np.asarray(
-        mlpack.decision_tree(input_model=m, test=np.asfortranarray(X))["predictions"]
-    ).astype(int).ravel()
+## STUDENT INPUT
+
 
 # ─── Regime A: ROW-LEVEL stratified split (OPTIMISTIC — the deployed artifact) ──
 # Stratify so every class keeps its proportion in all three splits. NOTE: because
