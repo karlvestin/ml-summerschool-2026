@@ -474,14 +474,45 @@ long leakPredict(aSubRecord* prec)   // EPICS calls this EVERY scan; prec = our 
     return -1;                                                 // ...and do nothing else
   }
 
-  // STUDENT INPUT
-  // Read the 4 live sensor values EPICS handed us. 
+  // Read the 4 live sensor values EPICS handed us. prec->a..d are pointers; the
+  // "*(double*)..." reads the double that each one points to.
+  const double tt102  = *static_cast<double*>(prec->a);        // INPA: skid inlet (return) temperature
+  const double tt110  = *static_cast<double*>(prec->b);        // INPB: skid outlet (supply) temperature
+  const double li103  = *static_cast<double*>(prec->c);        // INPC: raw water level in the expansion vessel
+  const double pspeed = *static_cast<double*>(prec->d);        // INPD: pump speed
 
-  // STUDENT INPUT
-  // Write the time stamp procedure using epicsTimeStamp class and epicsTimeGetCurrent and epicsTimeDiffInSeconds class methods
+  const double deltaT    = tt102 - tt110;                      // feature 0: temperature rise across the load
+  const double levelCorr = li103 - ctx->beta * (tt102 - ctx->tRef);  // feature 2: level with thermal expansion removed
+
+  epicsTimeStamp now;                                          // a place to hold "the current time"
+  epicsTimeGetCurrent(&now);                                   // ask EPICS for the current timestamp
+  if (!ctx->haveEpoch) { ctx->epoch = now; ctx->haveEpoch = true; }  // remember the very first scan's time as t=0
+  const double tsec = epicsTimeDiffInSeconds(&now, &ctx->epoch);     // seconds elapsed since that t=0
+
+  /*
+  - epicsTimeStamp is EPICS's timestamp type — a small struct holding seconds + nanoseconds since the EPICS epoch (1990-01-01). now is this scan's time; ctx->epoch is the time of the very first scan, captured once and kept in the record's state.
+- epicsTimeDiffInSeconds(&now, &ctx->epoch) is an EPICS helper that subtracts two timestamps and returns their difference as a double number of seconds — i.e. now − epoch, including the fractional part from the nanoseconds (so you might get 12.750, not just 12).
+- The & passes the addresses of the two timestamps (the EPICS API takes pointers rather than copying the structs).
+
+So tsec = "how many seconds have elapsed since this record started sampling." On the first scan it's 0.0; a minute later it's ~60.0.
+
+Why relative to the first scan, not absolute time?
+
+Two reasons:                                                                                                                                                    
+1. It's the x-coordinate the math needs. One line later, tsec is stored in the sample: ctx->ring[...] = { tsec, levelCorr, tt102, ventNow };. The least-squares slope fits level against t, and the cumulative-drop loop checks so decide which samples fall inside the 15-minute window. Both needa numeric time axis.                                                                                                                                           2. Small numbers, cleaner arithmetic. Absolute EPICS seconds are  keeps the values small and tidy for the fit (and avoids anyprecision concerns in the centered sums).                                                                                                                      
+Why it matters                                                                                                                                                 
+Using a real measured timestamp — rather than just counting scans — is what makes the outputs physically correct:                                              
+- d_correctedLev_dt comes out in true mm per second, because the slope is Δlevel / Δ(real seconds). Even if scans arrive irregularly or the SCAN rate changes, the rate stays right.
+- The cumulative window is a genuine 900 s / 15 minutes of wall-clock time, not "180 scans" — so the leak detector integrates over a real, fixed duration
+regardless of timing jitter.
+
+In short: tsec gives the model an honest, fractional-second clockslopes are real rates and its window is a real 15 minutes.
+  */
+
+
   
-
-  // Read the 4 live sensor values EPICS handed us.
+  // A big sudden jump in RAW level means an N2 top-up (vent), not a leak. Flag it
+  // so it can be excluded from the slope fit below.
   const bool ventNow = ctx->havePrev &&
                        std::fabs(li103 - ctx->prevLevel) > ctx->ventStepMm;
 
@@ -570,25 +601,23 @@ long leakPredict(aSubRecord* prec)   // EPICS calls this EVERY scan; prec = our 
     deltaT, tt102, levelCorr, dLevelDt, pspeed, speedOverDt
   };
 
-  //STUDENT INPUT
-  // (Min-max normalise, CLAMPED to [0,1]; flag any out-of-envelope input so an
-  // extrapolated (e.g. cold-idle) point cannot masquerade as a confident class.)
-  // the normalised feature vector we feed the tree
-  // "out of distribution": did any feature leave the training range?
-  // scale so training-min->0 and training-max->1
-  // below training range: clamp to 0 and flag it
-  // above training range: clamp to 1 and flag it
-  // store the normalised value
-  
+  // Min-max normalise, CLAMPED to [0,1]; flag any out-of-envelope input so an
+  // extrapolated (e.g. cold-idle) point cannot masquerade as a confident class.
+  arma::vec x(NUM_FEATURES);                                  // the normalised feature vector we feed the tree
+  bool ood = false;                                          // "out of distribution": did any feature leave the training range?
+  for (int i = 0; i < NUM_FEATURES; ++i)
+  {
+    double u = (feat[i] - ctx->featMin[i]) / ctx->featRange[i];  // scale so training-min->0 and training-max->1
+    if      (u < 0.0) { u = 0.0; ood = true; }               // below training range: clamp to 0 and flag it
+    else if (u > 1.0) { u = 1.0; ood = true; }               // above training range: clamp to 1 and flag it
+    x[i] = u;                                                // store the normalised value
+  }
 
-  //STUDENT INPUT
+  size_t    cls = 0;                                         // the tree's predicted class index (0..9)
+  arma::vec probs;                                           // the tree's confidence for each class
+  ctx->model.tree.Classify(x, cls, probs);                  // run the decision tree on the features
+  const double treeConf = (cls < probs.n_elem) ? probs[cls] : 0.0;  // confidence of the chosen class (0..1)
 
-    // the tree's predicted class index (0..9)
-    // the tree's confidence for each class
-    // run the decision tree on the features
-    // confidence of the chosen class (0..1)
-
-  // ═══════════════════════════════════════════════════════════════════════════
   // Physics leak-DETECTION gate. The tree's absolute-condition splits fingerprint
   // one-off drain events and are NOT trustworthy for detection; detection is a
   // SUSTAINED level drop, guarded against thermal transients and N2 vent glitches.
@@ -610,25 +639,21 @@ long leakPredict(aSubRecord* prec)   // EPICS calls this EVERY scan; prec = our 
     if (ctx->badCount >= ctx->debounce) ctx->detected = false;   // enough in a row -> latch "no leak"
   }
   const bool detected = ctx->detected;                       // the debounced, latched leak decision
-  // ═══════════════════════════════════════════════════════════════════════════
 
-  //STUDENT INPUT
-
-  // (GUIDANCE: Outputs VALA = GATED class index (No leak=0 unless a physical leak is
+  // Outputs. VALA = GATED class index (No leak=0 unless a physical leak is
   // detected; the location is advisory-only). VALB = advisory-location
   // confidence. VALC = physics leak-detected (the trustworthy alarm). VALD/E =
-  // level rate + 5-min drop diagnostics. VALF = raw (ungated) tree class hint.)
-  
+  // level rate + 5-min drop diagnostics. VALF = raw (ungated) tree class hint.
   // VALG = out-of-training-envelope flag.
-  // VALA: location, but only if the gate fired
-  // tell EPICS VALA holds 1 element
-  // VALB: tree's confidence in that location
-  // VALC: the trustworthy leak/no-leak flag
-  // VALD: current level slope (mm/s) diagnostic
-  // VALE: cumulative drop over the window (mm)
-  // VALF: raw tree hint, even when not detected
-  // VALG: 1 if inputs left the training envelope
-  
+  *static_cast<double*>(prec->vala) = detected ? static_cast<double>(cls) : 0.0;  // VALA: location, but only if the gate fired
+  prec->neva = 1;                                            // tell EPICS VALA holds 1 element
+  *static_cast<double*>(prec->valb) = treeConf;                 prec->nevb = 1;   // VALB: tree's confidence in that location
+  *static_cast<double*>(prec->valc) = detected ? 1.0 : 0.0;     prec->nevc = 1;   // VALC: the trustworthy leak/no-leak flag
+  *static_cast<double*>(prec->vald) = dLevelDt;                 prec->nevd = 1;   // VALD: current level slope (mm/s) diagnostic
+  *static_cast<double*>(prec->vale) = cumDrop;                  prec->neve = 1;   // VALE: cumulative drop over the window (mm)
+  *static_cast<double*>(prec->valf) = static_cast<double>(cls); prec->nevf = 1;   // VALF: raw tree hint, even when not detected
+  *static_cast<double*>(prec->valg) = ood ? 1.0 : 0.0;          prec->nevg = 1;   // VALG: 1 if inputs left the training envelope
+
   return 0;                                                  // 0 = success; EPICS publishes the outputs we just set
 }
 
