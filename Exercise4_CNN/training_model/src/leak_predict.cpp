@@ -486,15 +486,17 @@ long leakPredict(aSubRecord* prec)   // EPICS calls this EVERY scan; prec = our 
 
 
   //STUDENT INPUT
-  // (Min-max normalise, CLAMPED to [0,1]; flag any out-of-envelope input so an
-  // extrapolated (e.g. cold-idle) point cannot masquerade as a confident class.)
-  // the normalised feature vector we feed the tree
-  // "out of distribution": did any feature leave the training range?
-  // scale so training-min->0 and training-max->1
-  // below training range: clamp to 0 and flag it
-  // above training range: clamp to 1 and flag it
-  // store the normalised value
-  
+  // Min-max normalise, CLAMPED to [0,1]; flag any out-of-envelope input so an
+  // extrapolated (e.g. cold-idle) point cannot masquerade as a confident class.
+  arma::vec x(NUM_FEATURES);                                  // the normalised feature vector we feed the tree
+  bool ood = false;                                          // "out of distribution": did any feature leave the training range?
+  for (int i = 0; i < NUM_FEATURES; ++i)
+  {
+    double u = (feat[i] - ctx->featMin[i]) / ctx->featRange[i];  // scale so training-min->0 and training-max->1
+    if      (u < 0.0) { u = 0.0; ood = true; }               // below training range: clamp to 0 and flag it
+    else if (u > 1.0) { u = 1.0; ood = true; }               // above training range: clamp to 1 and flag it
+    x[i] = u;                                                // store the normalised value
+  }
 
   //STUDENT INPUT
 
@@ -513,7 +515,8 @@ long leakPredict(aSubRecord* prec)   // EPICS calls this EVERY scan; prec = our 
   //    2. hold state through vent windows (ventInWindow); debounce N scans;
   //    3. latch a persistent ctx->detected.
   //  Reference answer: solutions/leak_predict.cpp.
-
+  (void) dTt102Dt; (void) ventInWindow;   // provided for the exercise (unused until built)
+  const bool detected = false;            // no gate yet -> record reports "No leak"
   // ═══════════════════════════════════════════════════════════════════════════
 
   //STUDENT INPUT
